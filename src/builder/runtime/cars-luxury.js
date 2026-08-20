@@ -48,6 +48,7 @@
       km: "كم",
       hp: "حصان",
       copied: "تم نسخ الرابط",
+      copyLink: "نسخ الرابط",
       close: "إغلاق",
     },
     en: {
@@ -84,6 +85,7 @@
       km: "km",
       hp: "HP",
       copied: "Link copied",
+      copyLink: "Copy link",
       close: "Close",
     },
   };
@@ -166,8 +168,9 @@
   function digits(v) {
     return String(v).replace(/[^\d+]/g, "");
   }
-  function waLink(v) {
-    return "https://wa.me/" + digits(v).replace(/^\+/, "");
+  function waLink(v, message) {
+    var base = "https://wa.me/" + digits(v).replace(/^\+/, "");
+    return has(message) ? base + "?text=" + encodeURIComponent(String(message)) : base;
   }
 
   function num(value) {
@@ -1120,7 +1123,13 @@
         actionButton({ icon: "phone", label: L.call, href: "tel:" + digits(phone) }),
       );
     if (has(wa))
-      barIn.appendChild(actionButton({ icon: "whatsapp", label: L.whatsapp, href: waLink(wa) }));
+      barIn.appendChild(
+        actionButton({
+          icon: "whatsapp",
+          label: L.whatsapp,
+          href: waLink(wa, [cardTitle(), shareLink()].filter(has).join(" — ")),
+        }),
+      );
     if (map) barIn.appendChild(actionButton({ icon: "pin", label: L.location, href: map }));
     barIn.appendChild(actionButton({ icon: "share", label: L.share, onClick: share }));
     barIn.appendChild(actionButton({ icon: "qr", label: L.qr, onClick: openQr }));
