@@ -295,7 +295,7 @@ describe("hero image controls", () => {
   const template = builtInPresets().find((p) => p.cardType === "cars")!;
 
   it("cars demo hero uses the packaged 9:19 asset", () => {
-    const demo = generateDemoData("cars");
+    const demo = generateDemoData("cars", template.fieldUsage);
     expect(String(demo["cover_image"])).toContain("cars-luxury-hero");
   });
 
