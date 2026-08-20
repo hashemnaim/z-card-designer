@@ -7,7 +7,7 @@ import {
   REAL_ESTATE_LUXURY_EXTRAS,
 } from "@/builder/demo-data";
 
-import { generateFiles, usageBuckets } from "@/builder/runtime/generate";
+import { generateFiles, generateSchema, usageBuckets } from "@/builder/runtime/generate";
 import { builtInPresets, carsLuxuryPreset } from "@/builder/presets";
 import { themeForStyle, type FieldUsage, type TemplateRecord } from "@/builder/types";
 
@@ -238,4 +238,53 @@ describe("cars luxury preset", () => {
     expect(js).not.toContain("api.qrserver.com");
     expect(js).toContain("share_card");
   });
+});
+
+describe("package parity with the standalone reference layout", () => {
+  for (const cardType of CARD_TYPES) {
+    const template = makeTemplate(cardType);
+
+    it(`${cardType}: ships schema.json, the official contract and both demo files`, () => {
+      const files = generateFiles(template);
+      expect(files.contractFileName).toBe(`${cardType}.template.json`);
+      expect(files.demoFileName).toBe("demo.json");
+      expect(() => JSON.parse(files["schema.json"])).not.toThrow();
+      expect(() => JSON.parse(files.contractJson)).not.toThrow();
+      expect(files["demo-data.js"]).toContain("window.ZCARD_DEMO_DATA =");
+      expect(JSON.parse(files.contractJson).card_type).toBe(getContract(cardType).card_type);
+    });
+
+    it(`${cardType}: schema matches the contract keys and required usage`, () => {
+      const schema = generateSchema(template);
+      expect(schema["x-schemaVersion"]).toBe(getContract(cardType).schema_version);
+      expect(schema.additionalProperties).toBe(true);
+      for (const key of usageBuckets(template).required) {
+        expect(schema.required).toContain(key);
+        expect(Object.keys(schema.properties)).toContain(key);
+      }
+      for (const key of Object.keys(schema.properties)) {
+        expect(allowedKeys(template).has(key)).toBe(true);
+      }
+    });
+
+    it(`${cardType}: manifest points at every packaged file`, () => {
+      const manifest = JSON.parse(generateFiles(template)["manifest.json"]) as Record<string, unknown>;
+      expect(manifest.schema).toBe("schema.json");
+      expect(manifest.contract).toBe(`${cardType}.template.json`);
+      expect(manifest.demo_data).toBe("demo.json");
+      expect(manifest.demo_data_js).toBe("demo-data.js");
+      expect(manifest.runtime).toMatchObject({
+        globalData: "window.ZCARD_DATA",
+        renderer: "window.ZCardTemplate.render(data)",
+        dependencies: [],
+      });
+    });
+
+    it(`${cardType}: index.html falls back to the demo bootstrap`, () => {
+      const html = generateFiles(template)["index.html"];
+      expect(html).toContain('<script src="demo-data.js"></script>');
+      expect(html).toContain("window.ZCARD_DATA = window.ZCARD_DATA || window.ZCARD_DEMO_DATA");
+      expect(html.indexOf("demo-data.js")).toBeLessThan(html.indexOf('src="template.js"'));
+    });
+  }
 });
