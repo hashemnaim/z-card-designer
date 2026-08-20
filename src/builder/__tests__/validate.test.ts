@@ -1,7 +1,12 @@
 import { describe, expect, it } from "vitest";
 import { CARD_TYPES, getContract, type CardType } from "@/contracts";
 import { allowedKeys, validatePayload, validateTemplate } from "@/builder/validate";
-import { generateDemoData, REAL_ESTATE_LUXURY_EXTRAS } from "@/builder/demo-data";
+import {
+  CARS_LUXURY_EXTRAS,
+  generateDemoData,
+  REAL_ESTATE_LUXURY_EXTRAS,
+} from "@/builder/demo-data";
+
 import { generateFiles, usageBuckets } from "@/builder/runtime/generate";
 import { themeForStyle, type FieldUsage, type TemplateRecord } from "@/builder/types";
 
