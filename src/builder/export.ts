@@ -1,11 +1,21 @@
 import JSZip from "jszip";
 import type { TemplateRecord } from "./types";
 import { generateDemoDataJs, generateFiles, generateManifest } from "./runtime/generate";
+import { validateAssetManifest } from "./validate";
+
+/** One responsive step: WebP first, JPG kept as the universal fallback. */
+export interface AssetVariantPair {
+  webp?: string;
+  jpg: string;
+}
 
 export interface AssetVariantEntry {
   source: string;
+  /** Preferred file (WebP when it could be encoded). */
   file: string;
-  variants: { thumb?: string; medium?: string; large?: string };
+  /** Always-safe original download. */
+  fallback: string;
+  variants: Partial<Record<keyof typeof VARIANT_WIDTHS, AssetVariantPair>>;
 }
 
 export interface ExportResult {
@@ -15,7 +25,9 @@ export interface ExportResult {
   assets: number;
   assetsFailed: number;
   variants: number;
+  webp: number;
 }
+
 
 const IMAGE_EXT = /\.(png|jpe?g|webp|gif|avif|svg)$/i;
 
