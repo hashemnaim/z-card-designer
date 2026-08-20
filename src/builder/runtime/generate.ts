@@ -262,7 +262,7 @@ export function generateManifest(template: TemplateRecord) {
     entry: "index.html",
     style: "styles.css",
     script: "template.js",
-    demo_data: `${template.id}.demo.json`,
+    demo_data: "demo.json",
     supports: {
       rtl: template.direction !== "ltr",
       ltr: template.direction !== "rtl",
@@ -281,7 +281,7 @@ export function generateFiles(template: TemplateRecord): GeneratedFiles {
     "styles.css": generateCss(template),
     "template.js": generateTemplateJs(template),
     "manifest.json": JSON.stringify(generateManifest(template), null, 2),
-    demoFileName: `${template.id}.demo.json`,
+    demoFileName: "demo.json",
     demoJson: JSON.stringify(template.demoData, null, 2),
   };
 }

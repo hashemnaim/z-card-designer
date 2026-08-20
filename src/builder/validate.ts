@@ -77,7 +77,7 @@ export function validateTemplate(template: TemplateRecord): ValidationReport {
   checks.push({
     id: "files-demo",
     group: "files",
-    level: files.demoFileName === `${template.id}.demo.json` ? "pass" : "fail",
+    level: files.demoFileName === "demo.json" ? "pass" : "fail",
     message: `Demo file name ${files.demoFileName}`,
   });
 
