@@ -4,11 +4,12 @@ import {
   generateFiles,
   generateManifest,
   humanize,
+  isLuxuryCars,
   isLuxuryRealEstate,
   usageBuckets,
   usedFields,
 } from "./runtime/generate";
-import { REAL_ESTATE_LUXURY_EXTRAS } from "./demo-data";
+import { CARS_LUXURY_EXTRAS, REAL_ESTATE_LUXURY_EXTRAS } from "./demo-data";
 
 const MANIFEST_HINTS: Record<string, string> = {
   id: "Template id is empty — set it in the template identity.",
@@ -29,8 +30,12 @@ export function allowedKeys(template: TemplateRecord): Set<string> {
   if (isLuxuryRealEstate(template)) {
     for (const key of Object.keys(REAL_ESTATE_LUXURY_EXTRAS)) keys.add(key);
   }
+  if (isLuxuryCars(template)) {
+    for (const key of Object.keys(CARS_LUXURY_EXTRAS)) keys.add(key);
+  }
   return keys;
 }
+
 
 export type CheckLevel = "pass" | "warn" | "fail";
 
