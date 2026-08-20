@@ -257,7 +257,9 @@ export async function exportTemplateZip(template: TemplateRecord): Promise<Expor
     assets: downloaded,
     assetsFailed: failed,
     variants,
+    webp,
   };
+
 
 }
 
