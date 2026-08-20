@@ -8,9 +8,37 @@ import { generateRealEstateLuxuryCss } from "./real-estate-luxury-css";
  * (landscape floating vehicle image instead of a portrait property thumb).
  */
 export function generateCarsLuxuryCss(template: TemplateRecord): string {
+  const fit = template.theme.heroImageFit ?? "cover";
+  const focusMap = { top: "50% 18%", center: "50% 50%", bottom: "50% 82%" } as const;
+  const focus = focusMap[template.theme.heroImageFocus ?? "center"];
+  const zoom = template.theme.heroImageZoom ?? 1;
   return `${generateRealEstateLuxuryCss(template)}
 /* ---------- cars layout ---------- */
+.zc-root--cars {
+  --zc-hero-fit: ${fit};
+  --zc-hero-focus: ${focus};
+  --zc-hero-zoom: ${zoom};
+}
+
+/* image loading placeholder (shimmer until the asset is decoded) */
+.zc-img--loading {
+  background-color: #f1f1f1;
+  background-image: linear-gradient(100deg, #f1f1f1 20%, #fafafa 42%, #f1f1f1 64%);
+  background-size: 260% 100%;
+  animation: zc-shimmer 1.15s linear infinite;
+}
+.zc-img--loading.zc-hero__carimg { min-height: 150px; }
+.zc-img--error { background: var(--zc-card); }
+@keyframes zc-shimmer {
+  0% { background-position: 130% 0; }
+  100% { background-position: -130% 0; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .zc-img--loading { animation: none; }
+}
+
 .zc-qr__canvas { width: 232px; height: 232px; display: block; image-rendering: pixelated; border-radius: 8px; }
+
 .zc-qr__copy {
   border: 0;
   cursor: pointer;
@@ -48,11 +76,18 @@ export function generateCarsLuxuryCss(template: TemplateRecord): string {
 }
 .zc-hero__carimg {
   width: 100%;
-  max-height: 190px;
-  object-fit: cover;
+  height: clamp(140px, 42vw, 200px);
+  max-height: 200px;
+  object-fit: var(--zc-hero-fit, cover);
+  object-position: var(--zc-hero-focus, 50% 50%);
+  transform: scale(var(--zc-hero-zoom, 1));
   border-radius: 28px;
   filter: drop-shadow(0 26px 34px rgba(17, 17, 17, 0.34));
 }
+.zc-hero--cars .zc-hero__coverimg {
+  object-position: var(--zc-hero-focus, 50% 50%);
+}
+
 .zc-sticky__thumb--car {
   width: 46px; height: 34px;
   border-radius: 12px;

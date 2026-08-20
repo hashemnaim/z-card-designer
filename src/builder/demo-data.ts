@@ -1,8 +1,17 @@
 import { getContract, type CardType, type ContractField } from "@/contracts";
 import type { TemplateRecord } from "./types";
+import carsHeroAsset from "@/assets/cars-luxury-hero.jpg.asset.json";
 
 const PHOTO = (seed: string, w = 800, h = 600) =>
   `https://images.unsplash.com/photo-${seed}?auto=format&fit=crop&w=${w}&h=${h}`;
+
+/** CDN asset paths need an absolute URL so the preview iframe and the ZIP exporter can fetch them. */
+const ASSET = (path: string) =>
+  typeof window === "undefined" ? path : new URL(path, window.location.origin).href;
+
+/** Regenerated 9:19 hero shot for the Cars Luxury layout. */
+export const CARS_LUXURY_HERO = () => ASSET(carsHeroAsset.url);
+
 
 const PERSON_PHOTOS = [
   PHOTO("1544005313-94ddf0286df2", 900, 1100),
@@ -150,8 +159,9 @@ export const REAL_ESTATE_LUXURY_EXTRAS: Record<string, unknown> = {
 
 /** Extra keys consumed by the Cars Luxury mobile-card layout. */
 export const CARS_LUXURY_EXTRAS: Record<string, unknown> = {
-  cover_image: PHOTO("1618843479313-40f8afb4b4d8", 1200, 900),
-  featured_image: PHOTO("1520031441872-265e4ff70366", 1200, 800),
+  cover_image: carsHeroAsset.url,
+  featured_image: carsHeroAsset.url,
+
   title: "2024 Mercedes-Benz G63 AMG",
   brand: "Mercedes-Benz",
   model: "G63 AMG",
@@ -273,8 +283,14 @@ export function generateDemoData(
     out[field.key] = field.key in bank ? bank[field.key] : fallbackValue(field);
   }
   if (cardType === "real-estate") Object.assign(out, REAL_ESTATE_LUXURY_EXTRAS);
-  if (cardType === "cars") Object.assign(out, CARS_LUXURY_EXTRAS);
+  if (cardType === "cars") {
+    Object.assign(out, CARS_LUXURY_EXTRAS, {
+      cover_image: CARS_LUXURY_HERO(),
+      featured_image: CARS_LUXURY_HERO(),
+    });
+  }
   return out;
+
 }
 
 

@@ -20,7 +20,14 @@ export interface ThemeConfig {
   density: "compact" | "regular" | "roomy";
   heroStyle: "cover" | "portrait" | "framed" | "none";
   contactStyle: "floating" | "inline" | "list";
+  /** how the hero image fills its frame */
+  heroImageFit?: "cover" | "contain";
+  /** vertical focal point used when the hero image is cropped */
+  heroImageFocus?: "top" | "center" | "bottom";
+  /** extra scale applied to the hero image (1 = no zoom) */
+  heroImageZoom?: number;
   uppercaseLabels: boolean;
+
 }
 
 export interface TemplateReference {
@@ -223,8 +230,12 @@ export const DEFAULT_THEME: ThemeConfig = {
   density: "regular",
   heroStyle: "cover",
   contactStyle: "floating",
+  heroImageFit: "cover",
+  heroImageFocus: "center",
+  heroImageZoom: 1,
   uppercaseLabels: false,
 };
+
 
 export function themeForStyle(style: string): ThemeConfig {
   return { ...DEFAULT_THEME, style, ...(PRESET_THEMES[style] ?? {}) };
