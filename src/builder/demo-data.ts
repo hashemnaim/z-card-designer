@@ -121,7 +121,7 @@ const TEXT_VALUES: Record<string, Record<string, unknown>> = {
 };
 
 /** Extra keys consumed by the Real Estate Luxury mobile-card layout. */
-const REAL_ESTATE_LUXURY_EXTRAS: Record<string, unknown> = {
+export const REAL_ESTATE_LUXURY_EXTRAS: Record<string, unknown> = {
   cover_image: PHOTO("1613977257363-707ba9348227", 1200, 900),
   property_image: PHOTO("1600585154340-be6161a56a0c", 700, 700),
   price: 12000000,

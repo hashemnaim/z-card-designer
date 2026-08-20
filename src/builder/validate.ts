@@ -1,6 +1,16 @@
 import { contractKeys, getContract } from "@/contracts";
 import type { TemplateRecord } from "./types";
-import { generateFiles, generateManifest, usageBuckets, usedFields } from "./runtime/generate";
+import { generateFiles, generateManifest, isLuxuryRealEstate, usageBuckets, usedFields } from "./runtime/generate";
+import { REAL_ESTATE_LUXURY_EXTRAS } from "./demo-data";
+
+/** Contract keys plus any extra keys the selected layout renders natively. */
+export function allowedKeys(template: TemplateRecord): Set<string> {
+  const keys = new Set(contractKeys(template.cardType));
+  if (isLuxuryRealEstate(template)) {
+    for (const key of Object.keys(REAL_ESTATE_LUXURY_EXTRAS)) keys.add(key);
+  }
+  return keys;
+}
 
 export type CheckLevel = "pass" | "warn" | "fail";
 
@@ -34,7 +44,7 @@ export function validateTemplate(template: TemplateRecord): ValidationReport {
   const checks: CheckResult[] = [];
   const files = generateFiles(template);
   const manifest = generateManifest(template) as unknown as Record<string, unknown>;
-  const allowed = new Set(contractKeys(template.cardType));
+  const allowed = allowedKeys(template);
   const contract = getContract(template.cardType);
 
   // Manifest
@@ -212,7 +222,7 @@ export function validatePayload(raw: string, template: TemplateRecord): PayloadC
     };
   }
   const data = parsed as Record<string, unknown>;
-  const allowed = new Set(contractKeys(template.cardType));
+  const allowed = allowedKeys(template);
   const unknownKeys = Object.keys(data).filter((k) => !allowed.has(k));
   const missingRequired = usageBuckets(template).required.filter((k) => !hasValue(data[k]));
   return { valid: true, unknownKeys, missingRequired, data };
