@@ -19,7 +19,10 @@ export function FilesPane({ template }: { template: TemplateRecord }) {
         ["styles.css", files["styles.css"]],
         ["template.js", files["template.js"]],
         ["manifest.json", files["manifest.json"]],
+        ["schema.json", files["schema.json"]],
+        [files.contractFileName, files.contractJson],
         [files.demoFileName, files.demoJson],
+        ["demo-data.js", files["demo-data.js"]],
       ] as [string, string][],
     [files],
   );

@@ -125,6 +125,32 @@ export function validateTemplate(template: TemplateRecord): ValidationReport {
       ? `Generated files missing content: ${emptyFiles.join(", ")}`
       : "index.html, styles.css, template.js, manifest.json generated",
   });
+  const packageFiles: Array<[string, string]> = [
+    ["schema.json", files["schema.json"]],
+    [files.contractFileName, files.contractJson],
+    ["demo-data.js", files["demo-data.js"]],
+  ];
+  const emptyPackage = packageFiles.filter(([, body]) => !String(body ?? "").trim());
+  checks.push({
+    id: "files-package",
+    group: "files",
+    level: emptyPackage.length ? "fail" : "pass",
+    message: emptyPackage.length
+      ? `Package files missing content: ${emptyPackage.map(([name]) => name).join(", ")}`
+      : `schema.json, ${files.contractFileName}, demo-data.js generated`,
+    fields: emptyPackage.map(([name]) => ({
+      key: name,
+      reason: `${name} was generated empty`,
+      hint: "Check the card type contract and field usage before exporting.",
+    })),
+  });
+  checks.push({
+    id: "files-demo-js",
+    group: "files",
+    level: files["demo-data.js"].includes("window.ZCARD_DEMO_DATA") ? "pass" : "fail",
+    message: "demo-data.js exposes window.ZCARD_DEMO_DATA",
+  });
+
   checks.push({
     id: "files-demo",
     group: "files",
