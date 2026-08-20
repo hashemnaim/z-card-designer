@@ -1,6 +1,12 @@
 import JSZip from "jszip";
 import type { TemplateRecord } from "./types";
-import { generateDemoDataJs, generateFiles } from "./runtime/generate";
+import { generateDemoDataJs, generateFiles, generateManifest } from "./runtime/generate";
+
+export interface AssetVariantEntry {
+  source: string;
+  file: string;
+  variants: { thumb?: string; medium?: string; large?: string };
+}
 
 export interface ExportResult {
   fileName: string;
@@ -8,9 +14,13 @@ export interface ExportResult {
   bytes: number;
   assets: number;
   assetsFailed: number;
+  variants: number;
 }
 
 const IMAGE_EXT = /\.(png|jpe?g|webp|gif|avif|svg)$/i;
+
+/** Responsive widths generated next to every downloaded asset. */
+export const VARIANT_WIDTHS = { thumb: 240, medium: 720, large: 1280 } as const;
 
 function isImageUrl(value: string) {
   if (value.startsWith("data:image/")) return true;
@@ -18,7 +28,7 @@ function isImageUrl(value: string) {
   try {
     const url = new URL(value);
     if (IMAGE_EXT.test(url.pathname)) return true;
-    return /images\.unsplash\.com|photo-|\/image|cdn/i.test(value);
+    return /images\.unsplash\.com|photo-|\/image|cdn|__l5e/i.test(value);
   } catch {
     return false;
   }
@@ -33,11 +43,36 @@ function extFromType(type: string) {
   return "jpg";
 }
 
-/** Walks demo data, downloads every image and rewrites the value to a local assets/ path. */
+/** Rescales a blob to `width` px and returns JPEG bytes (browser only, canvas based). */
+async function resizeBlob(blob: Blob, width: number): Promise<ArrayBuffer | null> {
+  try {
+    if (typeof createImageBitmap !== "function") return null;
+    const bitmap = await createImageBitmap(blob);
+    if (bitmap.width <= width) return null;
+    const height = Math.max(1, Math.round((bitmap.height / bitmap.width) * width));
+    const canvas = document.createElement("canvas");
+    canvas.width = width;
+    canvas.height = height;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return null;
+    ctx.drawImage(bitmap, 0, 0, width, height);
+    const out = await new Promise<Blob | null>((resolve) =>
+      canvas.toBlob((b) => resolve(b), "image/jpeg", 0.86),
+    );
+    return out ? await out.arrayBuffer() : null;
+  } catch {
+    return null;
+  }
+}
+
+
+/** Walks demo data, downloads every image (plus responsive variants) into assets/. */
 async function localizeImages(data: unknown, assetsFolder: JSZip | null) {
   const cache = new Map<string, string>();
+  const manifestAssets: AssetVariantEntry[] = [];
   let downloaded = 0;
   let failed = 0;
+  let variants = 0;
   let counter = 0;
 
   async function fetchOne(url: string): Promise<string | null> {
@@ -47,9 +82,25 @@ async function localizeImages(data: unknown, assetsFolder: JSZip | null) {
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const blob = await res.blob();
       counter += 1;
-      const name = `image-${String(counter).padStart(2, "0")}.${extFromType(blob.type || url)}`;
+      const ext = extFromType(blob.type || url);
+      const base = `image-${String(counter).padStart(2, "0")}`;
+      const name = `${base}.${ext}`;
       assetsFolder?.file(name, await blob.arrayBuffer());
-      const relative = `assets/${name}`;
+      const entry: AssetVariantEntry = { source: url, file: `assets/${name}`, variants: {} };
+
+      if (ext !== "svg" && ext !== "gif") {
+        for (const [label, width] of Object.entries(VARIANT_WIDTHS)) {
+          const bytes = await resizeBlob(blob, width);
+          if (!bytes) continue;
+          const variantName = `${base}-${label}.jpg`;
+          assetsFolder?.file(variantName, bytes);
+          entry.variants[label as keyof typeof VARIANT_WIDTHS] = `assets/${variantName}`;
+          variants += 1;
+        }
+      }
+
+      manifestAssets.push(entry);
+      const relative = entry.file;
       cache.set(url, relative);
       downloaded += 1;
       return relative;
@@ -82,8 +133,9 @@ async function localizeImages(data: unknown, assetsFolder: JSZip | null) {
   }
 
   const localized = await walk(data);
-  return { localized, downloaded, failed };
+  return { localized, downloaded, failed, variants, manifestAssets };
 }
+
 
 /** Builds the standalone template package and triggers a browser download. */
 export async function exportTemplateZip(template: TemplateRecord): Promise<ExportResult> {
@@ -95,19 +147,34 @@ export async function exportTemplateZip(template: TemplateRecord): Promise<Expor
   folder.file("index.html", generated["index.html"]);
   folder.file("styles.css", generated["styles.css"]);
   folder.file("template.js", generated["template.js"]);
-  folder.file("manifest.json", generated["manifest.json"]);
   folder.file("schema.json", generated["schema.json"]);
   folder.file(generated.contractFileName, generated.contractJson);
 
   const assets = folder.folder("assets");
   assets?.file(
     "README.txt",
-    "Template assets. Demo images are downloaded here and referenced with relative paths (assets/...).\n",
+    "Template assets. Demo images are downloaded here and referenced with relative paths (assets/...).\n" +
+      `Responsive variants: thumb ${VARIANT_WIDTHS.thumb}px, medium ${VARIANT_WIDTHS.medium}px, large ${VARIANT_WIDTHS.large}px.\n`,
   );
 
-  const { localized, downloaded, failed } = await localizeImages(template.demoData, assets);
+  const { localized, downloaded, failed, variants, manifestAssets } = await localizeImages(
+    template.demoData,
+    assets,
+  );
   folder.file(generated.demoFileName, JSON.stringify(localized, null, 2));
   folder.file("demo-data.js", generateDemoDataJs(localized));
+
+  /** manifest carries the localized asset map so consumers can pick a responsive size */
+  const manifest = {
+    ...generateManifest(template),
+    assets: {
+      folder: "assets/",
+      variant_widths: VARIANT_WIDTHS,
+      images: manifestAssets,
+    },
+  };
+  folder.file("manifest.json", JSON.stringify(manifest, null, 2));
+
 
   const referenceImage = template.reference.imageDataUrl;
   if (referenceImage?.startsWith("data:image/")) {
@@ -136,7 +203,9 @@ export async function exportTemplateZip(template: TemplateRecord): Promise<Expor
     bytes: blob.size,
     assets: downloaded,
     assetsFailed: failed,
+    variants,
   };
+
 }
 
 function downloadBlob(blob: Blob, fileName: string) {

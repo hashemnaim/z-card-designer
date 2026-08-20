@@ -213,6 +213,60 @@ export function PropertiesPane({
               </div>
             </div>
           ))}
+          <div className="space-y-2 rounded-lg border border-border bg-card p-3">
+            <Label className="text-[11px] uppercase tracking-wide text-muted-foreground">
+              Hero image · crop &amp; fit
+            </Label>
+            <div className="space-y-1">
+              <Label className="text-xs">Fit</Label>
+              <div className="flex gap-1">
+                {(["cover", "contain"] as const).map((option) => (
+                  <button
+                    key={option}
+                    onClick={() => setTheme({ heroImageFit: option })}
+                    className={`flex-1 rounded border px-1 py-1 text-[10px] transition-colors ${
+                      (theme.heroImageFit ?? "cover") === option
+                        ? "border-primary bg-primary/10 text-primary"
+                        : "border-border text-muted-foreground hover:bg-accent"
+                    }`}
+                  >
+                    {option}
+                  </button>
+                ))}
+              </div>
+            </div>
+            <div className="space-y-1">
+              <Label className="text-xs">Focal point</Label>
+              <div className="flex gap-1">
+                {(["top", "center", "bottom"] as const).map((option) => (
+                  <button
+                    key={option}
+                    onClick={() => setTheme({ heroImageFocus: option })}
+                    className={`flex-1 rounded border px-1 py-1 text-[10px] transition-colors ${
+                      (theme.heroImageFocus ?? "center") === option
+                        ? "border-primary bg-primary/10 text-primary"
+                        : "border-border text-muted-foreground hover:bg-accent"
+                    }`}
+                  >
+                    {option}
+                  </button>
+                ))}
+              </div>
+            </div>
+            <div className="space-y-1">
+              <Label className="text-xs">Zoom · {(theme.heroImageZoom ?? 1).toFixed(2)}x</Label>
+              <input
+                type="range"
+                min={0.8}
+                max={1.4}
+                step={0.02}
+                value={theme.heroImageZoom ?? 1}
+                onChange={(e) => setTheme({ heroImageZoom: Number(e.target.value) })}
+                className="w-full accent-[var(--primary)]"
+              />
+            </div>
+          </div>
+
           <div className="flex items-center justify-between rounded-lg border border-border bg-card px-3 py-2">
             <Label htmlFor="upper" className="text-xs">
               Uppercase labels

@@ -130,8 +130,20 @@
     n.setAttribute("alt", alt || "");
     n.setAttribute("loading", "lazy");
     n.setAttribute("decoding", "async");
+    /* placeholder state until the asset is decoded */
+    n.className = (n.className ? n.className + " " : "") + "zc-img--loading";
+    function done() {
+      n.classList.remove("zc-img--loading");
+    }
+    if (n.complete && n.naturalWidth) done();
+    n.addEventListener("load", done);
+    n.addEventListener("error", function () {
+      done();
+      n.classList.add("zc-img--error");
+    });
     return n;
   }
+
 
   function list(value) {
     if (Array.isArray(value)) return value.filter(has);

@@ -1,5 +1,5 @@
 import { getContract, type CardType } from "@/contracts";
-import { generateDemoData } from "./demo-data";
+import { CARS_LUXURY_HERO, generateDemoData } from "./demo-data";
 import { builtInPresets } from "./presets";
 import { themeForStyle, type Direction, type FieldUsage, type TemplateRecord } from "./types";
 
@@ -13,8 +13,26 @@ interface StoreShape {
 /** Adds any missing built-in preset so shipped designs always show up in the library. */
 function withPresets(templates: TemplateRecord[]): TemplateRecord[] {
   const missing = builtInPresets().filter((p) => !templates.some((t) => t.id === p.id));
-  return missing.length ? [...templates, ...missing] : templates;
+  return (missing.length ? [...templates, ...missing] : templates).map(migrate);
 }
+
+const LEGACY_CAR_HERO = /images\.unsplash\.com\/photo-(1618843479313|1520031441872)/;
+
+/** Repoints legacy stock car heroes at the regenerated 9:19 hero asset. */
+function migrate(template: TemplateRecord): TemplateRecord {
+  if (template.cardType !== "cars") return template;
+  const demo = template.demoData ?? {};
+  const keys = ["cover_image", "featured_image"] as const;
+  const stale = keys.some((k) => typeof demo[k] === "string" && LEGACY_CAR_HERO.test(demo[k] as string));
+  if (!stale) return template;
+  const hero = CARS_LUXURY_HERO();
+  const nextDemo = { ...demo };
+  for (const k of keys) {
+    if (typeof nextDemo[k] === "string" && LEGACY_CAR_HERO.test(nextDemo[k] as string)) nextDemo[k] = hero;
+  }
+  return { ...template, demoData: nextDemo };
+}
+
 
 function read(): StoreShape {
   if (typeof window === "undefined") return { version: 1, templates: withPresets([]) };
