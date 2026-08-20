@@ -227,6 +227,7 @@ export function generateIndexHtml(template: TemplateRecord): string {
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>${escapeHtml(template.name)}</title>
+${FONT_LINKS}
     <link rel="stylesheet" href="styles.css" />
   </head>
   <body>
