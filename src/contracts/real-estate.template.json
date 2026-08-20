@@ -1,0 +1,418 @@
+{
+  "template_contract_version": "1.0.0",
+  "schema_version": "real-estate-v1",
+  "card_type": "real-estate",
+  "category": {
+    "id": 2,
+    "slug": "real-estate",
+    "name": "عقارات",
+    "icon": "🏛️",
+    "type": "both"
+  },
+  "runtime_rules": {
+    "api_payload_source": "Z Card API",
+    "hide_missing_fields": true,
+    "hide_empty_sections": true,
+    "ignore_unknown_fields": true,
+    "render_only_declared_fields": true,
+    "allow_multiple_designs_for_same_card_type": true,
+    "designs_must_not_rename_api_keys": true
+  },
+  "field_usage": {
+    "required": [
+      "Phone",
+      "WhatsApp",
+      "property_name",
+      "property_type"
+    ],
+    "optional": [
+      "gallery_images",
+      "company_name",
+      "email_address",
+      "video_url",
+      "youtube_url",
+      "tiktok_url",
+      "x_url",
+      "facebook_url",
+      "instagram_url",
+      "linkedin_url",
+      "area",
+      "agent_name",
+      "google_maps_url",
+      "area_unit",
+      "country",
+      "property_status",
+      "bathrooms",
+      "state",
+      "property_description",
+      "bedrooms",
+      "city",
+      "ready_to_move",
+      "address",
+      "year_built",
+      "parking_spaces",
+      "map_url"
+    ]
+  },
+  "sections": [
+    {
+      "id": "media",
+      "fields": [
+        "gallery_images",
+        "video_url"
+      ],
+      "hide_when_empty": true
+    },
+    {
+      "id": "contact",
+      "fields": [
+        "Phone",
+        "WhatsApp",
+        "company_name",
+        "email_address"
+      ],
+      "hide_when_empty": true
+    },
+    {
+      "id": "social",
+      "fields": [
+        "youtube_url",
+        "tiktok_url",
+        "x_url",
+        "facebook_url",
+        "instagram_url",
+        "linkedin_url"
+      ],
+      "hide_when_empty": true
+    },
+    {
+      "id": "property",
+      "fields": [
+        "property_name",
+        "property_type",
+        "property_status",
+        "property_description",
+        "ready_to_move",
+        "year_built"
+      ],
+      "hide_when_empty": true
+    },
+    {
+      "id": "specifications",
+      "fields": [
+        "area",
+        "area_unit",
+        "bathrooms",
+        "bedrooms",
+        "parking_spaces"
+      ],
+      "hide_when_empty": true
+    },
+    {
+      "id": "agent",
+      "fields": [
+        "agent_name"
+      ],
+      "hide_when_empty": true
+    },
+    {
+      "id": "location",
+      "fields": [
+        "google_maps_url",
+        "country",
+        "state",
+        "city",
+        "address",
+        "map_url"
+      ],
+      "hide_when_empty": true
+    }
+  ],
+  "fields": [
+    {
+      "id": 72,
+      "key": "gallery_images",
+      "name": "صور المعرض",
+      "type": "gallery",
+      "options": null,
+      "is_required": false,
+      "is_global": true
+    },
+    {
+      "id": 9,
+      "key": "Phone",
+      "name": "هاتف",
+      "type": "phone",
+      "options": null,
+      "is_required": true,
+      "is_global": true
+    },
+    {
+      "id": 8,
+      "key": "WhatsApp",
+      "name": "واتساب",
+      "type": "phone",
+      "options": null,
+      "is_required": true,
+      "is_global": true
+    },
+    {
+      "id": 54,
+      "key": "company_name",
+      "name": "اسم الشركة",
+      "type": "text",
+      "options": null,
+      "is_required": false,
+      "is_global": true
+    },
+    {
+      "id": 58,
+      "key": "email_address",
+      "name": "البريد الإلكتروني",
+      "type": "email",
+      "options": null,
+      "is_required": false,
+      "is_global": true
+    },
+    {
+      "id": 73,
+      "key": "video_url",
+      "name": "رابط الفيديو",
+      "type": "video_url",
+      "options": null,
+      "is_required": false,
+      "is_global": true
+    },
+    {
+      "id": 79,
+      "key": "youtube_url",
+      "name": "يوتيوب",
+      "type": "youtube",
+      "options": null,
+      "is_required": false,
+      "is_global": true
+    },
+    {
+      "id": 78,
+      "key": "tiktok_url",
+      "name": "تيك توك",
+      "type": "tiktok",
+      "options": null,
+      "is_required": false,
+      "is_global": true
+    },
+    {
+      "id": 77,
+      "key": "x_url",
+      "name": "إكس",
+      "type": "twitter",
+      "options": null,
+      "is_required": false,
+      "is_global": true
+    },
+    {
+      "id": 76,
+      "key": "facebook_url",
+      "name": "فيسبوك",
+      "type": "facebook",
+      "options": null,
+      "is_required": false,
+      "is_global": true
+    },
+    {
+      "id": 75,
+      "key": "instagram_url",
+      "name": "إنستجرام",
+      "type": "instagram",
+      "options": null,
+      "is_required": false,
+      "is_global": true
+    },
+    {
+      "id": 74,
+      "key": "linkedin_url",
+      "name": "لينكدإن",
+      "type": "linkedin",
+      "options": null,
+      "is_required": false,
+      "is_global": true
+    },
+    {
+      "id": 81,
+      "key": "property_name",
+      "name": "اسم العقار",
+      "type": "text",
+      "options": null,
+      "is_required": true,
+      "is_global": false
+    },
+    {
+      "id": 88,
+      "key": "area",
+      "name": "المساحة",
+      "type": "integer",
+      "options": null,
+      "is_required": false,
+      "is_global": false
+    },
+    {
+      "id": 104,
+      "key": "agent_name",
+      "name": "الاسم",
+      "type": "text",
+      "options": null,
+      "is_required": false,
+      "is_global": false
+    },
+    {
+      "id": 102,
+      "key": "google_maps_url",
+      "name": "رابط الخريطة",
+      "type": "google_map",
+      "options": null,
+      "is_required": false,
+      "is_global": false
+    },
+    {
+      "id": 82,
+      "key": "property_type",
+      "name": "نوع العقار",
+      "type": "select",
+      "options": [
+        "villa",
+        "apartment",
+        "studio",
+        "duplex",
+        "chalet",
+        "castle",
+        "land",
+        "farm",
+        "shop"
+      ],
+      "is_required": true,
+      "is_global": false
+    },
+    {
+      "id": 89,
+      "key": "area_unit",
+      "name": "وحدة المساحة",
+      "type": "select",
+      "options": [
+        "m2"
+      ],
+      "is_required": false,
+      "is_global": false
+    },
+    {
+      "id": 101,
+      "key": "country",
+      "name": "الدولة",
+      "type": "text",
+      "options": null,
+      "is_required": false,
+      "is_global": false
+    },
+    {
+      "id": 85,
+      "key": "property_status",
+      "name": "حالة العقار",
+      "type": "select",
+      "options": [
+        "جاهز للتسليم",
+        "تحت الانشاء"
+      ],
+      "is_required": false,
+      "is_global": false
+    },
+    {
+      "id": 91,
+      "key": "bathrooms",
+      "name": "عدد الحمامات",
+      "type": "integer",
+      "options": null,
+      "is_required": false,
+      "is_global": false
+    },
+    {
+      "id": 100,
+      "key": "state",
+      "name": "المحافظة",
+      "type": "text",
+      "options": null,
+      "is_required": false,
+      "is_global": false
+    },
+    {
+      "id": 140,
+      "key": "property_description",
+      "name": "وصف العقار",
+      "type": "textarea",
+      "options": null,
+      "is_required": false,
+      "is_global": false
+    },
+    {
+      "id": 90,
+      "key": "bedrooms",
+      "name": "عدد الغرف",
+      "type": "integer",
+      "options": null,
+      "is_required": false,
+      "is_global": false
+    },
+    {
+      "id": 99,
+      "key": "city",
+      "name": "المدينة",
+      "type": "text",
+      "options": null,
+      "is_required": false,
+      "is_global": false
+    },
+    {
+      "id": 94,
+      "key": "ready_to_move",
+      "name": "جاهز للسكن",
+      "type": "switch",
+      "options": null,
+      "is_required": false,
+      "is_global": false
+    },
+    {
+      "id": 98,
+      "key": "address",
+      "name": "العنوان",
+      "type": "text",
+      "options": null,
+      "is_required": false,
+      "is_global": false
+    },
+    {
+      "id": 93,
+      "key": "year_built",
+      "name": "سنة البناء",
+      "type": "integer",
+      "options": null,
+      "is_required": false,
+      "is_global": false
+    },
+    {
+      "id": 92,
+      "key": "parking_spaces",
+      "name": "عدد مواقف السيارات",
+      "type": "integer",
+      "options": null,
+      "is_required": false,
+      "is_global": false
+    },
+    {
+      "id": 87,
+      "key": "map_url",
+      "name": "فتح الموقع",
+      "type": "google_map",
+      "options": null,
+      "is_required": false,
+      "is_global": false
+    }
+  ]
+}

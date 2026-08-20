@@ -1,0 +1,344 @@
+{
+  "template_contract_version": "1.0.0",
+  "schema_version": "personal-v1",
+  "card_type": "personal",
+  "category": {
+    "id": 1,
+    "slug": "personal",
+    "name": "بطاقة شخصية ذكية",
+    "icon": "💼",
+    "type": "individual"
+  },
+  "runtime_rules": {
+    "api_payload_source": "Z Card API",
+    "hide_missing_fields": true,
+    "hide_empty_sections": true,
+    "ignore_unknown_fields": true,
+    "render_only_declared_fields": true,
+    "allow_multiple_designs_for_same_card_type": true,
+    "designs_must_not_rename_api_keys": true
+  },
+  "field_usage": {
+    "required": [
+      "Phone",
+      "WhatsApp",
+      "company_name",
+      "job_title",
+      "full_name"
+    ],
+    "optional": [
+      "gallery_images",
+      "email_address",
+      "short_bio",
+      "specialization",
+      "languages",
+      "experience_years",
+      "service_description",
+      "service_title",
+      "service_url",
+      "achievement_url",
+      "achievement_date",
+      "achievement_description",
+      "achievement_title",
+      "achievement_image",
+      "youtube_url",
+      "tiktok_url",
+      "x_url",
+      "facebook_url",
+      "instagram_url",
+      "linkedin_url"
+    ]
+  },
+  "sections": [
+    {
+      "id": "media",
+      "fields": [
+        "gallery_images"
+      ],
+      "hide_when_empty": true
+    },
+    {
+      "id": "contact",
+      "fields": [
+        "Phone",
+        "WhatsApp",
+        "email_address"
+      ],
+      "hide_when_empty": true
+    },
+    {
+      "id": "profile",
+      "fields": [
+        "company_name",
+        "job_title",
+        "full_name",
+        "short_bio",
+        "specialization",
+        "languages",
+        "experience_years"
+      ],
+      "hide_when_empty": true
+    },
+    {
+      "id": "services",
+      "fields": [
+        "service_description",
+        "service_title",
+        "service_url"
+      ],
+      "hide_when_empty": true
+    },
+    {
+      "id": "achievements",
+      "fields": [
+        "achievement_url",
+        "achievement_date",
+        "achievement_description",
+        "achievement_title",
+        "achievement_image"
+      ],
+      "hide_when_empty": true
+    },
+    {
+      "id": "social",
+      "fields": [
+        "youtube_url",
+        "tiktok_url",
+        "x_url",
+        "facebook_url",
+        "instagram_url",
+        "linkedin_url"
+      ],
+      "hide_when_empty": true
+    }
+  ],
+  "fields": [
+    {
+      "id": 72,
+      "key": "gallery_images",
+      "name": "صور المعرض",
+      "type": "gallery",
+      "options": null,
+      "is_required": false,
+      "is_global": true
+    },
+    {
+      "id": 9,
+      "key": "Phone",
+      "name": "هاتف",
+      "type": "phone",
+      "options": null,
+      "is_required": true,
+      "is_global": true
+    },
+    {
+      "id": 8,
+      "key": "WhatsApp",
+      "name": "واتساب",
+      "type": "phone",
+      "options": null,
+      "is_required": true,
+      "is_global": true
+    },
+    {
+      "id": 54,
+      "key": "company_name",
+      "name": "اسم الشركة",
+      "type": "text",
+      "options": null,
+      "is_required": true,
+      "is_global": true
+    },
+    {
+      "id": 58,
+      "key": "email_address",
+      "name": "البريد الإلكتروني",
+      "type": "email",
+      "options": null,
+      "is_required": false,
+      "is_global": true
+    },
+    {
+      "id": 53,
+      "key": "job_title",
+      "name": "المسمى الوظيفي",
+      "type": "text",
+      "options": null,
+      "is_required": true,
+      "is_global": false
+    },
+    {
+      "id": 52,
+      "key": "full_name",
+      "name": "الاسم الكامل",
+      "type": "text",
+      "options": null,
+      "is_required": true,
+      "is_global": false
+    },
+    {
+      "id": 55,
+      "key": "short_bio",
+      "name": "نبذة قصيرة",
+      "type": "textarea",
+      "options": null,
+      "is_required": false,
+      "is_global": false
+    },
+    {
+      "id": 62,
+      "key": "specialization",
+      "name": "التخصص",
+      "type": "text",
+      "options": null,
+      "is_required": false,
+      "is_global": false
+    },
+    {
+      "id": 61,
+      "key": "languages",
+      "name": "اللغات",
+      "type": "multiselect",
+      "options": [
+        "انجليزي"
+      ],
+      "is_required": false,
+      "is_global": false
+    },
+    {
+      "id": 60,
+      "key": "experience_years",
+      "name": "سنوات الخبرة",
+      "type": "integer",
+      "options": null,
+      "is_required": false,
+      "is_global": false
+    },
+    {
+      "id": 65,
+      "key": "service_description",
+      "name": "وصف الخدمة",
+      "type": "textarea",
+      "options": null,
+      "is_required": false,
+      "is_global": false
+    },
+    {
+      "id": 64,
+      "key": "service_title",
+      "name": "اسم الخدمة",
+      "type": "text",
+      "options": null,
+      "is_required": false,
+      "is_global": false
+    },
+    {
+      "id": 66,
+      "key": "service_url",
+      "name": "رابط الخدمة",
+      "type": "url",
+      "options": null,
+      "is_required": false,
+      "is_global": false
+    },
+    {
+      "id": 71,
+      "key": "achievement_url",
+      "name": "رابط الإنجاز",
+      "type": "url",
+      "options": null,
+      "is_required": false,
+      "is_global": false
+    },
+    {
+      "id": 70,
+      "key": "achievement_date",
+      "name": "تاريخ الإنجاز",
+      "type": "date",
+      "options": null,
+      "is_required": false,
+      "is_global": false
+    },
+    {
+      "id": 69,
+      "key": "achievement_description",
+      "name": "وصف الإنجاز",
+      "type": "textarea",
+      "options": null,
+      "is_required": false,
+      "is_global": false
+    },
+    {
+      "id": 68,
+      "key": "achievement_title",
+      "name": "عنوان الإنجاز",
+      "type": "text",
+      "options": null,
+      "is_required": false,
+      "is_global": false
+    },
+    {
+      "id": 67,
+      "key": "achievement_image",
+      "name": "صورة الإنجاز",
+      "type": "image",
+      "options": null,
+      "is_required": false,
+      "is_global": false
+    },
+    {
+      "id": 79,
+      "key": "youtube_url",
+      "name": "يوتيوب",
+      "type": "youtube",
+      "options": null,
+      "is_required": false,
+      "is_global": true
+    },
+    {
+      "id": 78,
+      "key": "tiktok_url",
+      "name": "تيك توك",
+      "type": "tiktok",
+      "options": null,
+      "is_required": false,
+      "is_global": true
+    },
+    {
+      "id": 77,
+      "key": "x_url",
+      "name": "إكس",
+      "type": "twitter",
+      "options": null,
+      "is_required": false,
+      "is_global": true
+    },
+    {
+      "id": 76,
+      "key": "facebook_url",
+      "name": "فيسبوك",
+      "type": "facebook",
+      "options": null,
+      "is_required": false,
+      "is_global": true
+    },
+    {
+      "id": 75,
+      "key": "instagram_url",
+      "name": "إنستجرام",
+      "type": "instagram",
+      "options": null,
+      "is_required": false,
+      "is_global": true
+    },
+    {
+      "id": 74,
+      "key": "linkedin_url",
+      "name": "لينكدإن",
+      "type": "linkedin",
+      "options": null,
+      "is_required": false,
+      "is_global": true
+    }
+  ]
+}
