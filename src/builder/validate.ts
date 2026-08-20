@@ -132,6 +132,11 @@ export function validateTemplate(template: TemplateRecord): ValidationReport {
         ? "Demo JSON contains keys that are not in the official data contract"
         : "Demo JSON uses official contract API keys only",
       detail: invented.join(", ") || undefined,
+      fields: invented.map((key) => ({
+        key,
+        reason: `"${key}" is not an API key of the ${template.cardType} contract, and not an extra key this layout renders`,
+        hint: "Remove it from the demo JSON, or replace it with the matching official contract key.",
+      })),
     });
 
     const requiredKeys = usageBuckets(template).required;
@@ -144,6 +149,11 @@ export function validateTemplate(template: TemplateRecord): ValidationReport {
         ? "Demo JSON is missing values for fields this design marks as required"
         : "Demo JSON covers every required field of this design",
       detail: missingRequired.join(", ") || undefined,
+      fields: missingRequired.map((key) => ({
+        key,
+        reason: `${label(key)} is marked Required by this design but has no value in the demo JSON`,
+        hint: "Add a demo value, or lower the field to Recommended/Optional in the Fields pane.",
+      })),
     });
 
     const contractRequired = contract.field_usage.required.filter(
@@ -157,8 +167,14 @@ export function validateTemplate(template: TemplateRecord): ValidationReport {
         ? "Contract-required fields are not used by this design"
         : "All contract-required fields are used by this design",
       detail: contractRequired.join(", ") || undefined,
+      fields: contractRequired.map((key) => ({
+        key,
+        reason: `${label(key)} is required by the official contract but this design marks it as Not used`,
+        hint: "Enable the field in the Fields pane so real API data is never dropped.",
+      })),
     });
   }
+
 
   // Runtime
   const hasRenderApi =
