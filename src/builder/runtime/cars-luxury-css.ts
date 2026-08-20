@@ -20,7 +20,7 @@ export function generateCarsLuxuryCss(template: TemplateRecord): string {
   letter-spacing: 0.02em;
   padding: 11px 22px;
   border-radius: 999px;
-  color: var(--zc-ink, #111111);
+  color: #111111;
   background: var(--zc-gold, #d4af37);
 }
 
