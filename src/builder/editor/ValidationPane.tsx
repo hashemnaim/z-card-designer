@@ -1,6 +1,8 @@
 import { AlertTriangle, CheckCircle2, XCircle } from "lucide-react";
 import { validateTemplate, type CheckLevel } from "@/builder/validate";
 import type { TemplateRecord } from "@/builder/types";
+import { ExportSummary } from "./ExportSummary";
+
 
 const ICONS: Record<CheckLevel, typeof CheckCircle2> = {
   pass: CheckCircle2,
