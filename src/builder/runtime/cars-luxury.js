@@ -243,7 +243,307 @@
     return node;
   }
 
+  /* ---------------- QR encoder (byte mode, EC level L, versions 1-9) ---------------- */
+  /* [total codewords, data codewords, ec codewords per block, blocks] */
+  var QR_CAP = [
+    null,
+    [26, 19, 7, 1],
+    [44, 34, 10, 1],
+    [70, 55, 15, 1],
+    [100, 80, 20, 1],
+    [134, 108, 26, 1],
+    [172, 136, 18, 2],
+    [196, 156, 20, 2],
+    [242, 194, 24, 2],
+    [292, 232, 30, 2],
+  ];
+  var QR_ALIGN = [
+    null,
+    [],
+    [6, 18],
+    [6, 22],
+    [6, 26],
+    [6, 30],
+    [6, 34],
+    [6, 22, 38],
+    [6, 24, 42],
+    [6, 26, 46],
+  ];
+  var QR_VERSION_BITS = { 7: 0x07c94, 8: 0x085bc, 9: 0x09a99 };
+
+  var GF_EXP = [];
+  var GF_LOG = [];
+  (function () {
+    var x = 1;
+    for (var i = 0; i < 255; i++) {
+      GF_EXP[i] = x;
+      GF_LOG[x] = i;
+      x <<= 1;
+      if (x & 0x100) x ^= 0x11d;
+    }
+    for (var j = 255; j < 512; j++) GF_EXP[j] = GF_EXP[j - 255];
+  })();
+
+  function gfMul(a, b) {
+    if (!a || !b) return 0;
+    return GF_EXP[GF_LOG[a] + GF_LOG[b]];
+  }
+
+  function rsGenerator(n) {
+    var poly = [1];
+    for (var i = 0; i < n; i++) {
+      var next = [];
+      for (var k = 0; k <= poly.length; k++) next[k] = 0;
+      for (var j = 0; j < poly.length; j++) {
+        next[j] ^= poly[j];
+        next[j + 1] ^= gfMul(poly[j], GF_EXP[i]);
+      }
+      poly = next;
+    }
+    return poly;
+  }
+
+  function rsEncode(data, ecLen) {
+    var gen = rsGenerator(ecLen);
+    var res = [];
+    for (var i = 0; i < ecLen; i++) res[i] = 0;
+    for (var d = 0; d < data.length; d++) {
+      var factor = data[d] ^ res[0];
+      res.shift();
+      res.push(0);
+      if (factor) {
+        for (var j = 0; j < ecLen; j++) res[j] ^= gfMul(gen[j + 1], factor);
+      }
+    }
+    return res;
+  }
+
+  function utf8Bytes(text) {
+    var str = String(text);
+    if (typeof TextEncoder !== "undefined") {
+      var enc = new TextEncoder().encode(str);
+      var arr = [];
+      for (var i = 0; i < enc.length; i++) arr.push(enc[i]);
+      return arr;
+    }
+    var out = [];
+    var escaped = unescape(encodeURIComponent(str));
+    for (var c = 0; c < escaped.length; c++) out.push(escaped.charCodeAt(c) & 0xff);
+    return out;
+  }
+
+  function qrCodewords(text) {
+    var bytes = utf8Bytes(text);
+    var version = 1;
+    while (version < 9 && bytes.length + 2 > QR_CAP[version][1]) version++;
+    if (bytes.length + 2 > QR_CAP[9][1]) bytes = bytes.slice(0, QR_CAP[9][1] - 2);
+    var cap = QR_CAP[version];
+    var dataCap = cap[1];
+    var ecLen = cap[2];
+    var blocks = cap[3];
+
+    var bits = [];
+    function push(value, len) {
+      for (var i = len - 1; i >= 0; i--) bits.push((value >> i) & 1);
+    }
+    push(4, 4); /* byte mode */
+    push(bytes.length, 8); /* count indicator, versions 1-9 */
+    for (var i = 0; i < bytes.length; i++) push(bytes[i], 8);
+    var capacity = dataCap * 8;
+    var terminator = Math.min(4, capacity - bits.length);
+    for (var t = 0; t < terminator; t++) bits.push(0);
+    while (bits.length % 8) bits.push(0);
+
+    var words = [];
+    for (var b = 0; b < bits.length; b += 8) {
+      var byte = 0;
+      for (var k = 0; k < 8; k++) byte = (byte << 1) | bits[b + k];
+      words.push(byte);
+    }
+    var pad = [0xec, 0x11];
+    var p = 0;
+    while (words.length < dataCap) words.push(pad[p++ % 2]);
+
+    var per = dataCap / blocks;
+    var dataBlocks = [];
+    var ecBlocks = [];
+    for (var g = 0; g < blocks; g++) {
+      var chunk = words.slice(g * per, (g + 1) * per);
+      dataBlocks.push(chunk);
+      ecBlocks.push(rsEncode(chunk, ecLen));
+    }
+    var out = [];
+    for (var ci = 0; ci < per; ci++)
+      for (var cb = 0; cb < blocks; cb++) out.push(dataBlocks[cb][ci]);
+    for (var ei = 0; ei < ecLen; ei++)
+      for (var eb = 0; eb < blocks; eb++) out.push(ecBlocks[eb][ei]);
+    return { version: version, codewords: out };
+  }
+
+  function bchFormat(data) {
+    var d = data << 10;
+    for (var i = 14; i >= 10; i--) {
+      if ((d >> i) & 1) d ^= 0x537 << (i - 10);
+    }
+    return (((data << 10) | (d & 0x3ff)) ^ 0x5412) & 0x7fff;
+  }
+
+  /** Returns a square matrix of 0/1 modules for the given text (mask pattern 0). */
+  function qrMatrix(text) {
+    var enc = qrCodewords(text);
+    var version = enc.version;
+    var size = version * 4 + 17;
+    var m = [];
+    var fixed = [];
+    for (var r = 0; r < size; r++) {
+      m[r] = [];
+      fixed[r] = [];
+      for (var c = 0; c < size; c++) {
+        m[r][c] = 0;
+        fixed[r][c] = 0;
+      }
+    }
+    function set(row, col, value) {
+      if (row < 0 || col < 0 || row >= size || col >= size) return;
+      m[row][col] = value ? 1 : 0;
+      fixed[row][col] = 1;
+    }
+    function finder(r0, c0) {
+      for (var dr = -1; dr <= 7; dr++) {
+        for (var dc = -1; dc <= 7; dc++) {
+          var ring =
+            (dr >= 0 && dr <= 6 && (dc === 0 || dc === 6)) ||
+            (dc >= 0 && dc <= 6 && (dr === 0 || dr === 6)) ||
+            (dr >= 2 && dr <= 4 && dc >= 2 && dc <= 4);
+          set(r0 + dr, c0 + dc, ring ? 1 : 0);
+        }
+      }
+    }
+    finder(0, 0);
+    finder(0, size - 7);
+    finder(size - 7, 0);
+
+    for (var i = 8; i < size - 8; i++) {
+      var tv = i % 2 === 0 ? 1 : 0;
+      set(6, i, tv);
+      set(i, 6, tv);
+    }
+
+    var align = QR_ALIGN[version];
+    for (var a = 0; a < align.length; a++) {
+      for (var a2 = 0; a2 < align.length; a2++) {
+        var ar = align[a];
+        var ac = align[a2];
+        if (
+          (ar <= 8 && ac <= 8) ||
+          (ar <= 8 && ac >= size - 9) ||
+          (ar >= size - 9 && ac <= 8)
+        )
+          continue;
+        for (var dr2 = -2; dr2 <= 2; dr2++) {
+          for (var dc2 = -2; dc2 <= 2; dc2++) {
+            var on = Math.max(Math.abs(dr2), Math.abs(dc2)) !== 1;
+            set(ar + dr2, ac + dc2, on ? 1 : 0);
+          }
+        }
+      }
+    }
+
+    /* reserve format + version areas */
+    for (var f = 0; f < 9; f++) {
+      if (!fixed[8][f]) set(8, f, 0);
+      if (!fixed[f][8]) set(f, 8, 0);
+    }
+    for (var f2 = 0; f2 < 8; f2++) {
+      set(8, size - 1 - f2, 0);
+      set(size - 1 - f2, 8, 0);
+    }
+    set(size - 8, 8, 1);
+    if (version >= 7) {
+      for (var vi = 0; vi < 3; vi++) {
+        for (var vj = 0; vj < 6; vj++) {
+          set(size - 11 + vi, vj, 0);
+          set(vj, size - 11 + vi, 0);
+        }
+      }
+    }
+
+    /* data placement + mask 0 */
+    var cw = enc.codewords;
+    var bitIndex = 0;
+    function nextBit() {
+      var byteI = bitIndex >> 3;
+      var bit = byteI < cw.length ? (cw[byteI] >> (7 - (bitIndex & 7))) & 1 : 0;
+      bitIndex++;
+      return bit;
+    }
+    var upward = true;
+    for (var col = size - 1; col > 0; col -= 2) {
+      if (col === 6) col = 5;
+      for (var step = 0; step < size; step++) {
+        var row = upward ? size - 1 - step : step;
+        for (var k2 = 0; k2 < 2; k2++) {
+          var cc = col - k2;
+          if (fixed[row][cc]) continue;
+          var bit = nextBit();
+          if ((row + cc) % 2 === 0) bit ^= 1;
+          m[row][cc] = bit;
+        }
+      }
+      upward = !upward;
+    }
+
+    /* format info: EC level L (01) + mask 0 */
+    var fmt = bchFormat((0x01 << 3) | 0);
+    for (var fi = 0; fi < 15; fi++) {
+      var fbit = (fmt >> fi) & 1;
+      if (fi < 6) m[fi][8] = fbit;
+      else if (fi < 8) m[fi + 1][8] = fbit;
+      else m[size - 15 + fi][8] = fbit;
+      if (fi < 8) m[8][size - 1 - fi] = fbit;
+      else m[8][15 - fi] = fbit;
+    }
+    m[size - 8][8] = 1;
+
+    if (version >= 7) {
+      var vbits = QR_VERSION_BITS[version];
+      for (var b2 = 0; b2 < 18; b2++) {
+        var vbit = (vbits >> b2) & 1;
+        m[Math.floor(b2 / 3)][size - 11 + (b2 % 3)] = vbit;
+        m[size - 11 + (b2 % 3)][Math.floor(b2 / 3)] = vbit;
+      }
+    }
+    return m;
+  }
+
+  /** Draws the QR for `text` on a canvas element (offline, no network). */
+  function qrCanvas(text, pixels) {
+    var matrix = qrMatrix(text);
+    var size = matrix.length;
+    var quiet = 4;
+    var total = size + quiet * 2;
+    var scale = Math.max(2, Math.floor((pixels || 240) / total));
+    var canvas = document.createElement("canvas");
+    canvas.className = "zc-qr__canvas";
+    canvas.width = total * scale;
+    canvas.height = total * scale;
+    canvas.setAttribute("role", "img");
+    var ctx = canvas.getContext("2d");
+    if (!ctx) return canvas;
+    ctx.fillStyle = "#ffffff";
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.fillStyle = "#111111";
+    for (var r = 0; r < size; r++) {
+      for (var c = 0; c < size; c++) {
+        if (matrix[r][c])
+          ctx.fillRect((c + quiet) * scale, (r + quiet) * scale, scale, scale);
+      }
+    }
+    return canvas;
+  }
+
   /* ---------------- overlays ---------------- */
+
   function toast(message) {
     var t = el("div", "zc-toast", message);
     document.body.appendChild(t);
