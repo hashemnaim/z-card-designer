@@ -74,8 +74,33 @@ describe("design-specific keys", () => {
   it("layout extras are not allowed for other card types", () => {
     const allowed = allowedKeys(makeTemplate("personal"));
     expect(allowed.has("verified_badge")).toBe(false);
+    expect(allowed.has("premium_sound")).toBe(false);
   });
 });
+
+describe("cars luxury layout", () => {
+  const template = makeTemplate("cars");
+
+  it("accepts cars layout extras as allowed keys", () => {
+    const allowed = allowedKeys(template);
+    for (const key of Object.keys(CARS_LUXURY_EXTRAS)) {
+      expect(allowed.has(key), `${key} should be allowed`).toBe(true);
+    }
+  });
+
+  it("does not report cars layout extras as unknown demo keys", () => {
+    const check = validateTemplate(template).checks.find((c) => c.id === "demo-keys");
+    expect(check?.level).toBe("pass");
+    expect(check?.fields ?? []).toEqual([]);
+  });
+
+  it("ships the cars-luxury runtime and stylesheet", () => {
+    const files = generateFiles(template);
+    expect(files["template.js"]).toContain('layout: "cars-luxury"');
+    expect(files["styles.css"]).toContain(".zc-hero__car");
+  });
+});
+
 
 describe("field-level failure reporting", () => {
   it("names an invented key with a reason and a hint", () => {
