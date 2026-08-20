@@ -595,6 +595,26 @@
     return parts.length ? parts.slice(0, 2).join(RTL ? "، " : ", ") : null;
   }
 
+  var TYPE_LABELS = {
+    villa: { ar: "فيلا", en: "Villa" },
+    apartment: { ar: "شقة", en: "Apartment" },
+    studio: { ar: "ستوديو", en: "Studio" },
+    duplex: { ar: "دوبلكس", en: "Duplex" },
+    chalet: { ar: "شاليه", en: "Chalet" },
+    castle: { ar: "قصر", en: "Castle" },
+    land: { ar: "أرض", en: "Land" },
+    farm: { ar: "مزرعة", en: "Farm" },
+    shop: { ar: "متجر", en: "Shop" },
+  };
+
+  function typeLabel(value) {
+    if (!has(value)) return null;
+    var key = String(value).trim().toLowerCase();
+    var entry = TYPE_LABELS[key];
+    if (!entry) return String(value);
+    return RTL ? entry.ar : entry.en;
+  }
+
   function statusText() {
     var status = get("property_status");
     return has(status) ? String(status) : null;
