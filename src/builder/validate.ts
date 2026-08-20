@@ -44,7 +44,7 @@ export function validateTemplate(template: TemplateRecord): ValidationReport {
   const checks: CheckResult[] = [];
   const files = generateFiles(template);
   const manifest = generateManifest(template) as unknown as Record<string, unknown>;
-  const allowed = new Set(contractKeys(template.cardType));
+  const allowed = allowedKeys(template);
   const contract = getContract(template.cardType);
 
   // Manifest
@@ -222,7 +222,7 @@ export function validatePayload(raw: string, template: TemplateRecord): PayloadC
     };
   }
   const data = parsed as Record<string, unknown>;
-  const allowed = new Set(contractKeys(template.cardType));
+  const allowed = allowedKeys(template);
   const unknownKeys = Object.keys(data).filter((k) => !allowed.has(k));
   const missingRequired = usageBuckets(template).required.filter((k) => !hasValue(data[k]));
   return { valid: true, unknownKeys, missingRequired, data };
