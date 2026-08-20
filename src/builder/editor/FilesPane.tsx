@@ -51,8 +51,10 @@ export function FilesPane({ template }: { template: TemplateRecord }) {
   }
 
   return (
-    <div className="flex h-full min-h-0 flex-col p-3">
-      <div className="flex items-center gap-1 overflow-x-auto pb-2">
+    <div className="flex h-full min-h-0 flex-col gap-2 overflow-auto p-3">
+      <ExportSummary template={template} />
+
+      <div className="flex items-center gap-1 overflow-x-auto pb-1">
         {entries.map(([name], index) => (
           <button
             key={name}
@@ -66,14 +68,21 @@ export function FilesPane({ template }: { template: TemplateRecord }) {
             {name}
           </button>
         ))}
-        <Button size="sm" className="ml-auto h-7 gap-1.5" onClick={download} disabled={busy}>
+        <Button
+          size="sm"
+          className="ml-auto h-7 gap-1.5"
+          onClick={download}
+          disabled={busy || !report.ok}
+        >
           {busy ? <Loader2 className="size-3 animate-spin" /> : <Download className="size-3" />}
           Export ZIP
         </Button>
       </div>
-      <pre className="min-h-0 flex-1 overflow-auto rounded-lg border border-border bg-card p-3 font-mono text-[11px] leading-relaxed text-muted-foreground">
+      {!report.ok && <p className="text-[11px] text-destructive">{t("fixBeforeExport")}</p>}
+      <pre className="min-h-[160px] flex-1 overflow-auto rounded-lg border border-border bg-card p-3 font-mono text-[11px] leading-relaxed text-muted-foreground">
         {entries[active]?.[1]}
       </pre>
     </div>
   );
+
 }
