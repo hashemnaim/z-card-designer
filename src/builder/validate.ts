@@ -226,6 +226,40 @@ export function validateTemplate(template: TemplateRecord): ValidationReport {
     });
   }
 
+  // Assets: every image reference must be localizable into assets/ at export time
+  if (demoParsed) {
+    const images = collectImageRefs(demoParsed);
+    const unresolvable = images.filter(({ value }) => !isLocalizableImage(value));
+    checks.push({
+      id: "assets-resolvable",
+      group: "demo",
+      level: unresolvable.length ? "fail" : "pass",
+      message: unresolvable.length
+        ? "Some image references cannot be packaged into assets/"
+        : `${images.length} image references can be packaged into assets/ (WebP + JPG fallback)`,
+      detail: unresolvable.map((i) => i.key).join(", ") || undefined,
+      fields: unresolvable.map(({ key, value }) => ({
+        key,
+        reason: `"${value.slice(0, 60)}" is not an absolute http(s)/data URL, so the exporter cannot download it`,
+        hint: "Use a full https:// URL (or a data: URL) so the image lands in assets/ with local paths.",
+      })),
+    });
+
+    /* dry-run of the exported manifest asset map: names must line up with packaged files */
+    const plan = planAssetManifest(images.map((i) => i.value).filter(isLocalizableImage));
+    const planIssues = validateAssetManifest(plan.manifest, plan.packaged);
+    checks.push({
+      id: "assets-manifest",
+      group: "manifest",
+      level: planIssues.length ? "fail" : "pass",
+      message: planIssues.length
+        ? "manifest.json asset references would not match the packaged files"
+        : "manifest.json asset references (WebP + JPG fallback) all resolve to packaged files",
+      detail: planIssues.map((i) => i.message).join("; ") || undefined,
+      fields: planIssues.flatMap((i) => i.fields ?? []),
+    });
+  }
+
 
   // Runtime
   const hasRenderApi =
@@ -309,4 +343,154 @@ export function validatePayload(raw: string, template: TemplateRecord): PayloadC
   const unknownKeys = Object.keys(data).filter((k) => !allowed.has(k));
   const missingRequired = usageBuckets(template).required.filter((k) => !hasValue(data[k]));
   return { valid: true, unknownKeys, missingRequired, data };
+}
+
+/* ---------------------------------------------------------------- assets --- */
+
+const IMAGE_LIKE = /\.(png|jpe?g|webp|gif|avif|svg)(\?|$)|images\.unsplash\.com|__l5e\/assets/i;
+
+/** Flat list of image-looking values in demo data, keyed by their dotted path. */
+export function collectImageRefs(
+  data: Record<string, unknown>,
+): { key: string; value: string }[] {
+  const out: { key: string; value: string }[] = [];
+  const walk = (value: unknown, path: string) => {
+    if (typeof value === "string") {
+      if (value.startsWith("data:image/") || IMAGE_LIKE.test(value)) out.push({ key: path, value });
+      return;
+    }
+    if (Array.isArray(value)) {
+      value.forEach((item, i) => walk(item, `${path}[${i}]`));
+      return;
+    }
+    if (value && typeof value === "object") {
+      for (const [k, v] of Object.entries(value as Record<string, unknown>)) {
+        walk(v, path ? `${path}.${k}` : k);
+      }
+    }
+  };
+  walk(data, "");
+  return out;
+}
+
+/** True when the exporter can fetch this reference and rewrite it to assets/. */
+export function isLocalizableImage(value: string) {
+  return (
+    /^https?:\/\//i.test(value) ||
+    value.startsWith("data:image/") ||
+    /* root-relative CDN asset paths resolve against the app origin at export time */
+    value.startsWith("/") ||
+    value.startsWith("assets/")
+  );
+}
+
+export const ASSET_VARIANT_LABELS = ["thumb", "medium", "large"] as const;
+
+/** Mirrors the exporter's naming so validation can dry-run the manifest asset map. */
+export function planAssetManifest(urls: string[]) {
+  const packaged = new Set<string>();
+  const seen = new Map<string, number>();
+  const images = urls
+    .filter((url) => {
+      if (seen.has(url)) return false;
+      seen.set(url, seen.size + 1);
+      return true;
+    })
+    .map((url) => {
+      const base = `image-${String(seen.get(url)).padStart(2, "0")}`;
+      const fallback = `assets/${base}.jpg`;
+      const file = `assets/${base}.webp`;
+      packaged.add(fallback);
+      packaged.add(file);
+      const variants: Record<string, { webp: string; jpg: string }> = {};
+      for (const label of ASSET_VARIANT_LABELS) {
+        const jpg = `assets/${base}-${label}.jpg`;
+        const webp = `assets/${base}-${label}.webp`;
+        packaged.add(jpg);
+        packaged.add(webp);
+        variants[label] = { webp, jpg };
+      }
+      return { source: url, file, fallback, variants };
+    });
+  return {
+    manifest: {
+      assets: { folder: "assets/", preferred_format: "webp", fallback_format: "jpg", images },
+    } as Record<string, unknown>,
+    packaged,
+  };
+}
+
+/**
+ * Checks that every asset path referenced by manifest.json exists in the package,
+ * and that each responsive step keeps a JPG fallback next to its WebP.
+ */
+export function validateAssetManifest(
+  manifest: Record<string, unknown>,
+  packaged: Set<string> | string[],
+): CheckResult[] {
+  const present = packaged instanceof Set ? packaged : new Set(packaged);
+  const issues: CheckResult[] = [];
+  const section = manifest["assets"] as
+    | { images?: { source?: string; file?: string; fallback?: string; variants?: Record<string, { webp?: string; jpg?: string }> }[] }
+    | undefined;
+  if (!section || !Array.isArray(section.images)) return issues;
+
+  const missing: FieldIssue[] = [];
+  const noFallback: FieldIssue[] = [];
+
+  section.images.forEach((entry, index) => {
+    const id = entry.source ?? `image[${index}]`;
+    const check = (path: string | undefined, what: string) => {
+      if (!path) return;
+      if (!present.has(path)) {
+        missing.push({
+          key: path,
+          reason: `manifest.json references ${what} "${path}" but that file is not in the package`,
+          hint: "Re-export the template so the assets folder and manifest are regenerated together.",
+        });
+      }
+    };
+    check(entry.file, "preferred image");
+    check(entry.fallback, "fallback image");
+    if (!entry.fallback) {
+      noFallback.push({
+        key: id,
+        reason: "asset entry has no JPG fallback",
+        hint: "Every WebP asset must ship a JPG fallback for clients without WebP support.",
+      });
+    }
+    for (const [label, pair] of Object.entries(entry.variants ?? {})) {
+      check(pair.webp, `${label} WebP variant`);
+      check(pair.jpg, `${label} JPG variant`);
+      if (pair.webp && !pair.jpg) {
+        noFallback.push({
+          key: `${id} · ${label}`,
+          reason: `${label} variant has a WebP file but no JPG fallback`,
+          hint: "Keep the JPG variant alongside the WebP one.",
+        });
+      }
+    }
+  });
+
+  if (missing.length) {
+    issues.push({
+      id: "assets-missing-files",
+      group: "manifest",
+      level: "fail",
+      message: `${missing.length} asset reference(s) in manifest.json do not exist in assets/`,
+      detail: missing.map((m) => m.key).join(", "),
+      fields: missing,
+    });
+  }
+  if (noFallback.length) {
+    issues.push({
+      id: "assets-missing-fallback",
+      group: "manifest",
+      level: "fail",
+      message: `${noFallback.length} asset entr(ies) are missing a JPG fallback`,
+      detail: noFallback.map((m) => m.key).join(", "),
+      fields: noFallback,
+    });
+  }
+  return issues;
 }

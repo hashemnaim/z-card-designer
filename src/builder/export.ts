@@ -1,11 +1,21 @@
 import JSZip from "jszip";
 import type { TemplateRecord } from "./types";
 import { generateDemoDataJs, generateFiles, generateManifest } from "./runtime/generate";
+import { validateAssetManifest } from "./validate";
+
+/** One responsive step: WebP first, JPG kept as the universal fallback. */
+export interface AssetVariantPair {
+  webp?: string;
+  jpg: string;
+}
 
 export interface AssetVariantEntry {
   source: string;
+  /** Preferred file (WebP when it could be encoded). */
   file: string;
-  variants: { thumb?: string; medium?: string; large?: string };
+  /** Always-safe original download. */
+  fallback: string;
+  variants: Partial<Record<keyof typeof VARIANT_WIDTHS, AssetVariantPair>>;
 }
 
 export interface ExportResult {
@@ -15,7 +25,9 @@ export interface ExportResult {
   assets: number;
   assetsFailed: number;
   variants: number;
+  webp: number;
 }
+
 
 const IMAGE_EXT = /\.(png|jpe?g|webp|gif|avif|svg)$/i;
 
@@ -24,6 +36,8 @@ export const VARIANT_WIDTHS = { thumb: 240, medium: 720, large: 1280 } as const;
 
 function isImageUrl(value: string) {
   if (value.startsWith("data:image/")) return true;
+  /* root-relative CDN asset path (e.g. /__l5e/assets-v1/...) — fetchable from the app origin */
+  if (value.startsWith("/") && IMAGE_EXT.test(value.split("?")[0] ?? "")) return true;
   if (!/^https?:\/\//i.test(value)) return false;
   try {
     const url = new URL(value);
@@ -43,37 +57,52 @@ function extFromType(type: string) {
   return "jpg";
 }
 
-/** Rescales a blob to `width` px and returns JPEG bytes (browser only, canvas based). */
-async function resizeBlob(blob: Blob, width: number): Promise<ArrayBuffer | null> {
+/** Rescales a blob to `width` px (or 0 = keep size) and encodes it to `type`. */
+async function encodeBlob(
+  blob: Blob,
+  width: number,
+  type: "image/jpeg" | "image/webp",
+): Promise<ArrayBuffer | null> {
   try {
     if (typeof createImageBitmap !== "function") return null;
     const bitmap = await createImageBitmap(blob);
-    if (bitmap.width <= width) return null;
-    const height = Math.max(1, Math.round((bitmap.height / bitmap.width) * width));
+    const targetWidth = width > 0 ? Math.min(width, bitmap.width) : bitmap.width;
+    if (width > 0 && bitmap.width <= width && type === "image/jpeg") return null;
+    const height = Math.max(1, Math.round((bitmap.height / bitmap.width) * targetWidth));
     const canvas = document.createElement("canvas");
-    canvas.width = width;
+    canvas.width = targetWidth;
     canvas.height = height;
     const ctx = canvas.getContext("2d");
     if (!ctx) return null;
-    ctx.drawImage(bitmap, 0, 0, width, height);
+    ctx.drawImage(bitmap, 0, 0, targetWidth, height);
     const out = await new Promise<Blob | null>((resolve) =>
-      canvas.toBlob((b) => resolve(b), "image/jpeg", 0.86),
+      canvas.toBlob((b) => resolve(b), type, type === "image/webp" ? 0.82 : 0.86),
     );
-    return out ? await out.arrayBuffer() : null;
+    /* browsers without WebP encoding silently fall back to PNG — reject those */
+    if (!out || (type === "image/webp" && out.type !== "image/webp")) return null;
+    return await out.arrayBuffer();
   } catch {
     return null;
   }
 }
 
-
-/** Walks demo data, downloads every image (plus responsive variants) into assets/. */
+/** Walks demo data, downloads every image (plus WebP/JPG responsive variants) into assets/. */
 async function localizeImages(data: unknown, assetsFolder: JSZip | null) {
   const cache = new Map<string, string>();
   const manifestAssets: AssetVariantEntry[] = [];
+  const packaged = new Set<string>();
   let downloaded = 0;
   let failed = 0;
   let variants = 0;
+  let webp = 0;
+
   let counter = 0;
+
+  function put(name: string, bytes: ArrayBuffer) {
+    assetsFolder?.file(name, bytes);
+    packaged.add(`assets/${name}`);
+    return `assets/${name}`;
+  }
 
   async function fetchOne(url: string): Promise<string | null> {
     if (cache.has(url)) return cache.get(url) ?? null;
@@ -84,26 +113,43 @@ async function localizeImages(data: unknown, assetsFolder: JSZip | null) {
       counter += 1;
       const ext = extFromType(blob.type || url);
       const base = `image-${String(counter).padStart(2, "0")}`;
-      const name = `${base}.${ext}`;
-      assetsFolder?.file(name, await blob.arrayBuffer());
-      const entry: AssetVariantEntry = { source: url, file: `assets/${name}`, variants: {} };
+      const original = put(`${base}.${ext}`, await blob.arrayBuffer());
+      const entry: AssetVariantEntry = {
+        source: url,
+        file: original,
+        fallback: original,
+        variants: {},
+      };
 
-      if (ext !== "svg" && ext !== "gif") {
+      const rasterizable = ext !== "svg" && ext !== "gif";
+      if (rasterizable) {
+        /* full-size WebP becomes the preferred file, the download stays as fallback */
+        if (ext !== "webp") {
+          const fullWebp = await encodeBlob(blob, 0, "image/webp");
+          if (fullWebp) {
+            entry.file = put(`${base}.webp`, fullWebp);
+            webp += 1;
+          }
+        }
         for (const [label, width] of Object.entries(VARIANT_WIDTHS)) {
-          const bytes = await resizeBlob(blob, width);
-          if (!bytes) continue;
-          const variantName = `${base}-${label}.jpg`;
-          assetsFolder?.file(variantName, bytes);
-          entry.variants[label as keyof typeof VARIANT_WIDTHS] = `assets/${variantName}`;
+          const jpgBytes = await encodeBlob(blob, width, "image/jpeg");
+          if (!jpgBytes) continue;
+          const pair: AssetVariantPair = { jpg: put(`${base}-${label}.jpg`, jpgBytes) };
           variants += 1;
+          const webpBytes = await encodeBlob(blob, width, "image/webp");
+          if (webpBytes) {
+            pair.webp = put(`${base}-${label}.webp`, webpBytes);
+            webp += 1;
+          }
+          entry.variants[label as keyof typeof VARIANT_WIDTHS] = pair;
         }
       }
 
       manifestAssets.push(entry);
-      const relative = entry.file;
-      cache.set(url, relative);
+      /* demo data points at the fallback so any consumer can load it without WebP support */
+      cache.set(url, entry.fallback);
       downloaded += 1;
-      return relative;
+      return entry.fallback;
     } catch (error) {
       console.warn("Asset download failed", url, error);
       cache.set(url, url);
@@ -111,6 +157,7 @@ async function localizeImages(data: unknown, assetsFolder: JSZip | null) {
       return null;
     }
   }
+
 
   async function walk(value: unknown): Promise<unknown> {
     if (typeof value === "string") {
@@ -133,8 +180,9 @@ async function localizeImages(data: unknown, assetsFolder: JSZip | null) {
   }
 
   const localized = await walk(data);
-  return { localized, downloaded, failed, variants, manifestAssets };
+  return { localized, downloaded, failed, variants, webp, manifestAssets, packaged };
 }
+
 
 
 /** Builds the standalone template package and triggers a browser download. */
@@ -154,13 +202,13 @@ export async function exportTemplateZip(template: TemplateRecord): Promise<Expor
   assets?.file(
     "README.txt",
     "Template assets. Demo images are downloaded here and referenced with relative paths (assets/...).\n" +
-      `Responsive variants: thumb ${VARIANT_WIDTHS.thumb}px, medium ${VARIANT_WIDTHS.medium}px, large ${VARIANT_WIDTHS.large}px.\n`,
+      `Responsive variants: thumb ${VARIANT_WIDTHS.thumb}px, medium ${VARIANT_WIDTHS.medium}px, large ${VARIANT_WIDTHS.large}px.\n` +
+      "Each step ships as .webp (preferred) plus .jpg (fallback); see manifest.json -> assets.images.\n",
   );
 
-  const { localized, downloaded, failed, variants, manifestAssets } = await localizeImages(
-    template.demoData,
-    assets,
-  );
+
+  const { localized, downloaded, failed, variants, webp, manifestAssets, packaged } =
+    await localizeImages(template.demoData, assets);
   folder.file(generated.demoFileName, JSON.stringify(localized, null, 2));
   folder.file("demo-data.js", generateDemoDataJs(localized));
 
@@ -170,10 +218,19 @@ export async function exportTemplateZip(template: TemplateRecord): Promise<Expor
     assets: {
       folder: "assets/",
       variant_widths: VARIANT_WIDTHS,
+      preferred_format: "webp",
+      fallback_format: "jpg",
       images: manifestAssets,
     },
   };
   folder.file("manifest.json", JSON.stringify(manifest, null, 2));
+
+  /* every asset path in the manifest must exist in the ZIP before we hand it to the user */
+  const assetIssues = validateAssetManifest(manifest, packaged);
+  if (assetIssues.length) {
+    throw new Error(`Asset manifest mismatch: ${assetIssues.map((i) => i.message).join("; ")}`);
+  }
+
 
 
   const referenceImage = template.reference.imageDataUrl;
@@ -204,7 +261,9 @@ export async function exportTemplateZip(template: TemplateRecord): Promise<Expor
     assets: downloaded,
     assetsFailed: failed,
     variants,
+    webp,
   };
+
 
 }
 
