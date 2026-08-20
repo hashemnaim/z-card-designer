@@ -10,6 +10,20 @@ import { generateRealEstateLuxuryCss } from "./real-estate-luxury-css";
 export function generateCarsLuxuryCss(template: TemplateRecord): string {
   return `${generateRealEstateLuxuryCss(template)}
 /* ---------- cars layout ---------- */
+.zc-qr__canvas { width: 232px; height: 232px; display: block; image-rendering: pixelated; border-radius: 8px; }
+.zc-qr__copy {
+  border: 0;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  padding: 11px 22px;
+  border-radius: 999px;
+  color: var(--zc-ink, #111111);
+  background: var(--zc-gold, #d4af37);
+}
+
 .zc-root--cars { padding-bottom: 140px; }
 
 .zc-hero--cars .zc-hero__cover {
