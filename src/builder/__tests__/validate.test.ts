@@ -351,9 +351,10 @@ describe("asset manifest validation", () => {
       expect(String(entry["file"])).toMatch(/\.webp$/);
       expect(String(entry["fallback"])).toMatch(/\.jpg$/);
       for (const label of ASSET_VARIANT_LABELS) {
-        const pair = (entry["variants"] as Record<string, { webp: string; jpg: string }>)[label];
+        const pair = (entry["variants"] as Record<string, { webp: string; jpg: string }>)[label]!;
         expect(pair.webp).toMatch(/\.webp$/);
         expect(pair.jpg).toMatch(/\.jpg$/);
+
       }
     }
     expect(validateAssetManifest(plan.manifest, plan.packaged)).toEqual([]);
