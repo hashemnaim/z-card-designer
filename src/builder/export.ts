@@ -178,8 +178,9 @@ async function localizeImages(data: unknown, assetsFolder: JSZip | null) {
   }
 
   const localized = await walk(data);
-  return { localized, downloaded, failed, variants, manifestAssets };
+  return { localized, downloaded, failed, variants, webp, manifestAssets, packaged };
 }
+
 
 
 /** Builds the standalone template package and triggers a browser download. */
