@@ -270,8 +270,10 @@ export function generateDemoData(
     out[field.key] = field.key in bank ? bank[field.key] : fallbackValue(field);
   }
   if (cardType === "real-estate") Object.assign(out, REAL_ESTATE_LUXURY_EXTRAS);
+  if (cardType === "cars") Object.assign(out, CARS_LUXURY_EXTRAS);
   return out;
 }
+
 
 export function regenerateDemo(template: TemplateRecord): Record<string, unknown> {
   return generateDemoData(template.cardType, template.fieldUsage);
