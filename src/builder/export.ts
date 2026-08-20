@@ -1,6 +1,6 @@
 import JSZip from "jszip";
 import type { TemplateRecord } from "./types";
-import { generateFiles } from "./runtime/generate";
+import { generateDemoDataJs, generateFiles } from "./runtime/generate";
 
 export interface ExportResult {
   fileName: string;
@@ -96,6 +96,8 @@ export async function exportTemplateZip(template: TemplateRecord): Promise<Expor
   folder.file("styles.css", generated["styles.css"]);
   folder.file("template.js", generated["template.js"]);
   folder.file("manifest.json", generated["manifest.json"]);
+  folder.file("schema.json", generated["schema.json"]);
+  folder.file(generated.contractFileName, generated.contractJson);
 
   const assets = folder.folder("assets");
   assets?.file(
@@ -105,6 +107,7 @@ export async function exportTemplateZip(template: TemplateRecord): Promise<Expor
 
   const { localized, downloaded, failed } = await localizeImages(template.demoData, assets);
   folder.file(generated.demoFileName, JSON.stringify(localized, null, 2));
+  folder.file("demo-data.js", generateDemoDataJs(localized));
 
   const referenceImage = template.reference.imageDataUrl;
   if (referenceImage?.startsWith("data:image/")) {
@@ -124,7 +127,10 @@ export async function exportTemplateZip(template: TemplateRecord): Promise<Expor
       `${template.id}/styles.css`,
       `${template.id}/template.js`,
       `${template.id}/manifest.json`,
+      `${template.id}/schema.json`,
+      `${template.id}/${generated.contractFileName}`,
       `${template.id}/${generated.demoFileName}`,
+      `${template.id}/demo-data.js`,
       `${template.id}/assets/`,
     ],
     bytes: blob.size,
