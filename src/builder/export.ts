@@ -55,37 +55,52 @@ function extFromType(type: string) {
   return "jpg";
 }
 
-/** Rescales a blob to `width` px and returns JPEG bytes (browser only, canvas based). */
-async function resizeBlob(blob: Blob, width: number): Promise<ArrayBuffer | null> {
+/** Rescales a blob to `width` px (or 0 = keep size) and encodes it to `type`. */
+async function encodeBlob(
+  blob: Blob,
+  width: number,
+  type: "image/jpeg" | "image/webp",
+): Promise<ArrayBuffer | null> {
   try {
     if (typeof createImageBitmap !== "function") return null;
     const bitmap = await createImageBitmap(blob);
-    if (bitmap.width <= width) return null;
-    const height = Math.max(1, Math.round((bitmap.height / bitmap.width) * width));
+    const targetWidth = width > 0 ? Math.min(width, bitmap.width) : bitmap.width;
+    if (width > 0 && bitmap.width <= width && type === "image/jpeg") return null;
+    const height = Math.max(1, Math.round((bitmap.height / bitmap.width) * targetWidth));
     const canvas = document.createElement("canvas");
-    canvas.width = width;
+    canvas.width = targetWidth;
     canvas.height = height;
     const ctx = canvas.getContext("2d");
     if (!ctx) return null;
-    ctx.drawImage(bitmap, 0, 0, width, height);
+    ctx.drawImage(bitmap, 0, 0, targetWidth, height);
     const out = await new Promise<Blob | null>((resolve) =>
-      canvas.toBlob((b) => resolve(b), "image/jpeg", 0.86),
+      canvas.toBlob((b) => resolve(b), type, type === "image/webp" ? 0.82 : 0.86),
     );
-    return out ? await out.arrayBuffer() : null;
+    /* browsers without WebP encoding silently fall back to PNG — reject those */
+    if (!out || (type === "image/webp" && out.type !== "image/webp")) return null;
+    return await out.arrayBuffer();
   } catch {
     return null;
   }
 }
 
-
-/** Walks demo data, downloads every image (plus responsive variants) into assets/. */
+/** Walks demo data, downloads every image (plus WebP/JPG responsive variants) into assets/. */
 async function localizeImages(data: unknown, assetsFolder: JSZip | null) {
   const cache = new Map<string, string>();
   const manifestAssets: AssetVariantEntry[] = [];
+  const packaged = new Set<string>();
   let downloaded = 0;
   let failed = 0;
   let variants = 0;
+  let webp = 0;
+
   let counter = 0;
+
+  function put(name: string, bytes: ArrayBuffer) {
+    assetsFolder?.file(name, bytes);
+    packaged.add(`assets/${name}`);
+    return `assets/${name}`;
+  }
 
   async function fetchOne(url: string): Promise<string | null> {
     if (cache.has(url)) return cache.get(url) ?? null;
@@ -96,26 +111,43 @@ async function localizeImages(data: unknown, assetsFolder: JSZip | null) {
       counter += 1;
       const ext = extFromType(blob.type || url);
       const base = `image-${String(counter).padStart(2, "0")}`;
-      const name = `${base}.${ext}`;
-      assetsFolder?.file(name, await blob.arrayBuffer());
-      const entry: AssetVariantEntry = { source: url, file: `assets/${name}`, variants: {} };
+      const original = put(`${base}.${ext}`, await blob.arrayBuffer());
+      const entry: AssetVariantEntry = {
+        source: url,
+        file: original,
+        fallback: original,
+        variants: {},
+      };
 
-      if (ext !== "svg" && ext !== "gif") {
+      const rasterizable = ext !== "svg" && ext !== "gif";
+      if (rasterizable) {
+        /* full-size WebP becomes the preferred file, the download stays as fallback */
+        if (ext !== "webp") {
+          const fullWebp = await encodeBlob(blob, 0, "image/webp");
+          if (fullWebp) {
+            entry.file = put(`${base}.webp`, fullWebp);
+            webp += 1;
+          }
+        }
         for (const [label, width] of Object.entries(VARIANT_WIDTHS)) {
-          const bytes = await resizeBlob(blob, width);
-          if (!bytes) continue;
-          const variantName = `${base}-${label}.jpg`;
-          assetsFolder?.file(variantName, bytes);
-          entry.variants[label as keyof typeof VARIANT_WIDTHS] = `assets/${variantName}`;
+          const jpgBytes = await encodeBlob(blob, width, "image/jpeg");
+          if (!jpgBytes) continue;
+          const pair: AssetVariantPair = { jpg: put(`${base}-${label}.jpg`, jpgBytes) };
           variants += 1;
+          const webpBytes = await encodeBlob(blob, width, "image/webp");
+          if (webpBytes) {
+            pair.webp = put(`${base}-${label}.webp`, webpBytes);
+            webp += 1;
+          }
+          entry.variants[label as keyof typeof VARIANT_WIDTHS] = pair;
         }
       }
 
       manifestAssets.push(entry);
-      const relative = entry.file;
-      cache.set(url, relative);
+      /* demo data points at the fallback so any consumer can load it without WebP support */
+      cache.set(url, entry.fallback);
       downloaded += 1;
-      return relative;
+      return entry.fallback;
     } catch (error) {
       console.warn("Asset download failed", url, error);
       cache.set(url, url);
@@ -123,6 +155,7 @@ async function localizeImages(data: unknown, assetsFolder: JSZip | null) {
       return null;
     }
   }
+
 
   async function walk(value: unknown): Promise<unknown> {
     if (typeof value === "string") {
