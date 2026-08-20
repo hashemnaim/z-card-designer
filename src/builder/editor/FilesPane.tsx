@@ -26,6 +26,8 @@ export function FilesPane({ template }: { template: TemplateRecord }) {
   const [active, setActive] = useState(0);
   const [busy, setBusy] = useState(false);
   const report = validateTemplate(template);
+  const { t } = useI18n();
+
 
   async function download() {
     if (!report.ok) {
