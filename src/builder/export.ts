@@ -36,6 +36,8 @@ export const VARIANT_WIDTHS = { thumb: 240, medium: 720, large: 1280 } as const;
 
 function isImageUrl(value: string) {
   if (value.startsWith("data:image/")) return true;
+  /* root-relative CDN asset path (e.g. /__l5e/assets-v1/...) — fetchable from the app origin */
+  if (value.startsWith("/") && IMAGE_EXT.test(value.split("?")[0] ?? "")) return true;
   if (!/^https?:\/\//i.test(value)) return false;
   try {
     const url = new URL(value);

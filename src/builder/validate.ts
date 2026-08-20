@@ -375,7 +375,13 @@ export function collectImageRefs(
 
 /** True when the exporter can fetch this reference and rewrite it to assets/. */
 export function isLocalizableImage(value: string) {
-  return /^https?:\/\//i.test(value) || value.startsWith("data:image/") || value.startsWith("assets/");
+  return (
+    /^https?:\/\//i.test(value) ||
+    value.startsWith("data:image/") ||
+    /* root-relative CDN asset paths resolve against the app origin at export time */
+    value.startsWith("/") ||
+    value.startsWith("assets/")
+  );
 }
 
 export const ASSET_VARIANT_LABELS = ["thumb", "medium", "large"] as const;
