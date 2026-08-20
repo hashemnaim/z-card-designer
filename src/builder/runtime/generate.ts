@@ -126,6 +126,7 @@ function densityScale(density: TemplateRecord["theme"]["density"]) {
 }
 
 export function generateCss(template: TemplateRecord): string {
+  if (isLuxuryRealEstate(template)) return generateRealEstateLuxuryCss(template);
   const t = template.theme;
   const d = densityScale(t.density);
   return `/* ${template.id} — Z Card template styles (standalone) */
