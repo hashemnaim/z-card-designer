@@ -8,6 +8,7 @@ import {
 } from "@/builder/demo-data";
 
 import { generateFiles, usageBuckets } from "@/builder/runtime/generate";
+import { builtInPresets, carsLuxuryPreset } from "@/builder/presets";
 import { themeForStyle, type FieldUsage, type TemplateRecord } from "@/builder/types";
 
 /** Builds a template record without touching localStorage (store.ts is browser-only). */
@@ -185,4 +186,56 @@ describe("generated package contract", () => {
       expect(() => JSON.parse(files["manifest.json"])).not.toThrow();
     });
   }
+});
+
+describe("cars luxury preset", () => {
+  const preset = carsLuxuryPreset();
+
+  it("is exposed as a built-in library preset for the cars card type", () => {
+    expect(builtInPresets().some((p) => p.id === preset.id)).toBe(true);
+    expect(preset.cardType).toBe("cars");
+    expect(preset.theme.accent.toLowerCase()).toBe("#d4af37");
+    expect(preset.theme.radius).toBe(28);
+  });
+
+  it("validates with zero blocking failures", () => {
+    const report = validateTemplate(preset);
+    expect(report.checks.filter((c) => c.level === "fail").map((c) => c.id)).toEqual([]);
+    expect(report.ok).toBe(true);
+  });
+
+  it("accepts the action-bar and share keys used by the layout", () => {
+    const keys = allowedKeys(preset);
+    for (const key of ["phone", "whatsapp", "share_card", "map_url", "location"]) {
+      expect(keys.has(key)).toBe(true);
+    }
+    const result = validatePayload(JSON.stringify(preset.demoData), preset);
+    expect(result.unknownKeys).toEqual([]);
+  });
+
+  it("manifest declares the cars-luxury layout with every rendered section and field", () => {
+    const files = generateFiles(preset);
+    const manifest = JSON.parse(files["manifest.json"]) as {
+      layout: string;
+      sections: { id: string; fields: string[] }[];
+      fields: string[];
+    };
+    expect(manifest.layout).toBe("cars-luxury");
+    expect(manifest.sections.length).toBeGreaterThan(0);
+    const declared = manifest.sections.flatMap((s) => s.fields);
+    for (const key of ["brand", "model", "year", "price", "phone", "WhatsApp"]) {
+      if (manifest.fields.includes(key)) expect(declared).toContain(key);
+    }
+    for (const key of usageBuckets(preset).required) {
+      expect(manifest.fields).toContain(key);
+    }
+  });
+
+  it("generates the QR offline with no external QR service", () => {
+    const js = generateFiles(preset)["template.js"];
+    expect(js).toContain("function qrMatrix");
+    expect(js).toContain("zc-qr__canvas");
+    expect(js).not.toContain("api.qrserver.com");
+    expect(js).toContain("share_card");
+  });
 });

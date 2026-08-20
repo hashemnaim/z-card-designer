@@ -1,5 +1,6 @@
 import { getContract, type CardType } from "@/contracts";
 import { generateDemoData } from "./demo-data";
+import { builtInPresets } from "./presets";
 import { themeForStyle, type Direction, type FieldUsage, type TemplateRecord } from "./types";
 
 const KEY = "zcard.template-builder.v1";
@@ -9,16 +10,25 @@ interface StoreShape {
   templates: TemplateRecord[];
 }
 
+/** Adds any missing built-in preset so shipped designs always show up in the library. */
+function withPresets(templates: TemplateRecord[]): TemplateRecord[] {
+  const missing = builtInPresets().filter((p) => !templates.some((t) => t.id === p.id));
+  return missing.length ? [...templates, ...missing] : templates;
+}
+
 function read(): StoreShape {
-  if (typeof window === "undefined") return { version: 1, templates: [] };
+  if (typeof window === "undefined") return { version: 1, templates: withPresets([]) };
   try {
     const raw = window.localStorage.getItem(KEY);
-    if (!raw) return { version: 1, templates: [] };
-    const parsed = JSON.parse(raw) as StoreShape;
-    if (!parsed || !Array.isArray(parsed.templates)) return { version: 1, templates: [] };
-    return { version: 1, templates: parsed.templates };
+    const parsed = raw ? (JSON.parse(raw) as StoreShape) : null;
+    const stored = parsed && Array.isArray(parsed.templates) ? parsed.templates : [];
+    const templates = withPresets(stored);
+    if (templates.length !== stored.length) {
+      window.localStorage.setItem(KEY, JSON.stringify({ version: 1, templates }));
+    }
+    return { version: 1, templates };
   } catch {
-    return { version: 1, templates: [] };
+    return { version: 1, templates: withPresets([]) };
   }
 }
 

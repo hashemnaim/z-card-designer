@@ -269,6 +269,12 @@ ${FONT_LINKS}
 
 export function generateManifest(template: TemplateRecord) {
   const buckets = usageBuckets(template);
+  const config = buildRuntimeConfig(template);
+  const layout = isLuxuryCars(template)
+    ? "cars-luxury"
+    : isLuxuryRealEstate(template)
+      ? "real-estate-luxury"
+      : "generic";
   return {
     id: template.id,
     slug: template.slug,
@@ -286,6 +292,13 @@ export function generateManifest(template: TemplateRecord) {
       languages: template.languages,
     },
     field_usage: buckets,
+    layout,
+    sections: config.sections.map((section) => ({
+      id: section.id,
+      label: section.label,
+      fields: section.fields.map((f) => f.key),
+    })),
+    fields: usedFields(template).map((f) => f.key),
     style_direction: template.theme.style,
     generated_by: "z-card-template-builder",
     generated_at: new Date().toISOString(),
