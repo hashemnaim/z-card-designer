@@ -120,6 +120,34 @@ const TEXT_VALUES: Record<string, Record<string, unknown>> = {
   },
 };
 
+/** Extra keys consumed by the Real Estate Luxury mobile-card layout. */
+const REAL_ESTATE_LUXURY_EXTRAS: Record<string, unknown> = {
+  cover_image: PHOTO("1613977257363-707ba9348227", 1200, 900),
+  property_image: PHOTO("1600585154340-be6161a56a0c", 700, 700),
+  price: 12000000,
+  currency: "EGP",
+  short_location: "التجمع الخامس، القاهرة الجديدة",
+  verified_badge: true,
+  short_description: "فيلا مستقلة عصرية بمسبح خاص وأنظمة منزل ذكي.",
+  phone_number: "+201001234567",
+  whatsapp_number: "+201001234567",
+  property_area: 520,
+  feature_name: [
+    "مسبح خاص",
+    "حديقة",
+    "منزل ذكي",
+    "مصعد",
+    "أمن ٢٤/٧",
+    "صالة رياضية",
+  ],
+  video_thumbnail: PHOTO("1600566753190-17f0baa2a6c3", 1200, 750),
+  agent_photo: PHOTO("1507003211169-0a1dd7228f2d", 400, 400),
+  agent_title: "مستشار عقاري أول",
+  agent_phone: "+201001234567",
+  agent_whatsapp: "+201001234567",
+  agent_email: "agent@zcard.example",
+};
+
 const SOCIALS: Record<string, string> = {
   youtube_url: "https://youtube.com/@zcard",
   tiktok_url: "https://tiktok.com/@zcard",
@@ -178,6 +206,7 @@ export function generateDemoData(
     if (usage === "unused") continue;
     out[field.key] = field.key in bank ? bank[field.key] : fallbackValue(field);
   }
+  if (cardType === "real-estate") Object.assign(out, REAL_ESTATE_LUXURY_EXTRAS);
   return out;
 }
 
