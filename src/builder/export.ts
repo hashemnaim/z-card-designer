@@ -11,6 +11,9 @@ export interface AssetVariantPair {
 
 export interface AssetVariantEntry {
   source: string;
+  /** every demo-data URL that resolves to this exact file (content-deduped) */
+  sources: string[];
+
   /** Preferred file (WebP when it could be encoded). */
   file: string;
   /** Always-safe original download. */
