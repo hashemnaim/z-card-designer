@@ -49,7 +49,8 @@ export function generateCarsLuxuryCss(template: TemplateRecord): string {
 .zc-hero__carimg {
   width: 100%;
   max-height: 190px;
-  object-fit: contain;
+  object-fit: cover;
+  border-radius: 28px;
   filter: drop-shadow(0 26px 34px rgba(17, 17, 17, 0.34));
 }
 .zc-sticky__thumb--car {
