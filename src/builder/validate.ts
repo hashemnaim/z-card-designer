@@ -54,6 +54,8 @@ export function validateTemplate(template: TemplateRecord): ValidationReport {
   const manifest = generateManifest(template) as unknown as Record<string, unknown>;
   const allowed = allowedKeys(template);
   const contract = getContract(template.cardType);
+  const label = (key: string) =>
+    contract.fields.find((f) => f.key === key)?.name ?? humanize(key);
 
   // Manifest
   const missing = REQUIRED_MANIFEST_KEYS.filter((k) => {
@@ -66,7 +68,13 @@ export function validateTemplate(template: TemplateRecord): ValidationReport {
     level: missing.length ? "fail" : "pass",
     message: missing.length ? "Manifest is missing required keys" : "Manifest contains all required keys",
     detail: missing.join(", ") || undefined,
+    fields: missing.map((key) => ({
+      key,
+      reason: `manifest.json has no value for "${key}"`,
+      hint: MANIFEST_HINTS[key] ?? "Fill this value in the template properties before exporting.",
+    })),
   });
+
   checks.push({
     id: "manifest-version",
     group: "manifest",
