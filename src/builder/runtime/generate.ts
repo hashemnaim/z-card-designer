@@ -1,6 +1,8 @@
 import runtimeSource from "./template-runtime.js?raw";
 import luxuryRuntimeSource from "./real-estate-luxury.js?raw";
+import carsRuntimeSource from "./cars-luxury.js?raw";
 import { generateRealEstateLuxuryCss } from "./real-estate-luxury-css";
+import { generateCarsLuxuryCss } from "./cars-luxury-css";
 import { getContract, SECTION_LABELS, type ContractField } from "@/contracts";
 import type { TemplateRecord } from "../types";
 
@@ -8,6 +10,12 @@ import type { TemplateRecord } from "../types";
 export function isLuxuryRealEstate(template: TemplateRecord): boolean {
   return template.cardType === "real-estate";
 }
+
+/** The cars card type ships the dedicated luxury automotive mobile-card layout. */
+export function isLuxuryCars(template: TemplateRecord): boolean {
+  return template.cardType === "cars";
+}
+
 
 export interface GeneratedFiles {
   "index.html": string;
