@@ -148,6 +148,69 @@ export const REAL_ESTATE_LUXURY_EXTRAS: Record<string, unknown> = {
   agent_email: "agent@zcard.example",
 };
 
+/** Extra keys consumed by the Cars Luxury mobile-card layout. */
+export const CARS_LUXURY_EXTRAS: Record<string, unknown> = {
+  cover_image: PHOTO("1618843479313-40f8afb4b4d8", 1200, 900),
+  featured_image: PHOTO("1520031441872-265e4ff70366", 1200, 800),
+  title: "2024 Mercedes-Benz G63 AMG",
+  brand: "Mercedes-Benz",
+  model: "G63 AMG",
+  trim: "AMG Line",
+  year: 2024,
+  body_type: "SUV",
+  condition: "Brand New",
+  badge: "Brand New",
+  verified: true,
+  price: 12500000,
+  currency: "EGP",
+  location: "New Cairo, Egypt",
+  phone: "+201001234567",
+  whatsapp: "+201001234567",
+  email: "sales@elitemotors.example",
+  mileage: 8500,
+  transmission: "Automatic",
+  fuel_type: "Gasoline",
+  engine_size: "4.0L Twin Turbo V8",
+  horsepower: 577,
+  drivetrain: "4MATIC AWD",
+  exterior_color: "Obsidian Black",
+  interior_color: "Black Nappa Leather",
+  leather_seats: true,
+  sunroof: true,
+  rear_camera: true,
+  navigation: true,
+  apple_carplay: true,
+  android_auto: true,
+  cruise_control: true,
+  parking_sensors: true,
+  keyless_entry: true,
+  bluetooth: true,
+  blind_spot_monitor: true,
+  wireless_charger: true,
+  premium_sound: true,
+  description:
+    "Luxury SUV with AMG performance, premium interior and advanced driver assistance systems. Finished in Obsidian Black with Black Nappa Leather, fully serviced by the official dealer with warranty still active.",
+  short_description:
+    "Luxury SUV with AMG performance, premium interior and advanced driver assistance systems.",
+  gallery: CAR_PHOTOS,
+  interior_gallery: CAR_INTERIOR,
+  video_url: "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+  video_thumbnail: PHOTO("1552519507-da3b142c6e3d", 1200, 750),
+  seller_name: "Ahmed Hassan",
+  seller_title: "Senior Automotive Consultant",
+  seller_company: "Elite Motors",
+  seller_avatar: PHOTO("1507003211169-0a1dd7228f2d", 400, 400),
+  seller_verified: true,
+  website: "https://elitemotors.example",
+  instagram: "https://instagram.com/zcard",
+  facebook: "https://facebook.com/zcard",
+  youtube: "https://youtube.com/@zcard",
+  tiktok: "https://tiktok.com/@zcard",
+  linkedin: "https://linkedin.com/company/zcard",
+  x: "https://x.com/zcard",
+};
+
+
 const SOCIALS: Record<string, string> = {
   youtube_url: "https://youtube.com/@zcard",
   tiktok_url: "https://tiktok.com/@zcard",
@@ -207,8 +270,10 @@ export function generateDemoData(
     out[field.key] = field.key in bank ? bank[field.key] : fallbackValue(field);
   }
   if (cardType === "real-estate") Object.assign(out, REAL_ESTATE_LUXURY_EXTRAS);
+  if (cardType === "cars") Object.assign(out, CARS_LUXURY_EXTRAS);
   return out;
 }
+
 
 export function regenerateDemo(template: TemplateRecord): Record<string, unknown> {
   return generateDemoData(template.cardType, template.fieldUsage);

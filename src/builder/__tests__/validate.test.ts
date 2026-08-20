@@ -1,7 +1,12 @@
 import { describe, expect, it } from "vitest";
 import { CARD_TYPES, getContract, type CardType } from "@/contracts";
 import { allowedKeys, validatePayload, validateTemplate } from "@/builder/validate";
-import { generateDemoData, REAL_ESTATE_LUXURY_EXTRAS } from "@/builder/demo-data";
+import {
+  CARS_LUXURY_EXTRAS,
+  generateDemoData,
+  REAL_ESTATE_LUXURY_EXTRAS,
+} from "@/builder/demo-data";
+
 import { generateFiles, usageBuckets } from "@/builder/runtime/generate";
 import { themeForStyle, type FieldUsage, type TemplateRecord } from "@/builder/types";
 
@@ -69,8 +74,33 @@ describe("design-specific keys", () => {
   it("layout extras are not allowed for other card types", () => {
     const allowed = allowedKeys(makeTemplate("personal"));
     expect(allowed.has("verified_badge")).toBe(false);
+    expect(allowed.has("premium_sound")).toBe(false);
   });
 });
+
+describe("cars luxury layout", () => {
+  const template = makeTemplate("cars");
+
+  it("accepts cars layout extras as allowed keys", () => {
+    const allowed = allowedKeys(template);
+    for (const key of Object.keys(CARS_LUXURY_EXTRAS)) {
+      expect(allowed.has(key), `${key} should be allowed`).toBe(true);
+    }
+  });
+
+  it("does not report cars layout extras as unknown demo keys", () => {
+    const check = validateTemplate(template).checks.find((c) => c.id === "demo-keys");
+    expect(check?.level).toBe("pass");
+    expect(check?.fields ?? []).toEqual([]);
+  });
+
+  it("ships the cars-luxury runtime and stylesheet", () => {
+    const files = generateFiles(template);
+    expect(files["template.js"]).toContain('layout: "cars-luxury"');
+    expect(files["styles.css"]).toContain(".zc-hero__car");
+  });
+});
+
 
 describe("field-level failure reporting", () => {
   it("names an invented key with a reason and a hint", () => {
