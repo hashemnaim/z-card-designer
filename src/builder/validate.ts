@@ -1,7 +1,27 @@
 import { contractKeys, getContract } from "@/contracts";
 import type { TemplateRecord } from "./types";
-import { generateFiles, generateManifest, isLuxuryRealEstate, usageBuckets, usedFields } from "./runtime/generate";
+import {
+  generateFiles,
+  generateManifest,
+  humanize,
+  isLuxuryRealEstate,
+  usageBuckets,
+  usedFields,
+} from "./runtime/generate";
 import { REAL_ESTATE_LUXURY_EXTRAS } from "./demo-data";
+
+const MANIFEST_HINTS: Record<string, string> = {
+  id: "Template id is empty — set it in the template identity.",
+  name: "Template name is empty — set it in the template identity.",
+  version: "Version is empty — use a semantic version like 1.0.0.",
+  card_type: "Card type is missing — pick a card type for this template.",
+  schema_version: "schema_version must come from the official contract.",
+  entry: "Entry file (index.html) is not being generated.",
+  style: "Stylesheet (styles.css) is not being generated.",
+  script: "Runtime file (template.js) is not being generated.",
+  demo_data: "Demo file (demo.json) is not being generated.",
+};
+
 
 /** Contract keys plus any extra keys the selected layout renders natively. */
 export function allowedKeys(template: TemplateRecord): Set<string> {
