@@ -218,6 +218,13 @@ var ZC_CONFIG = ${JSON.stringify(payload, null, 2)};
 ${source}`;
 }
 
+const FONT_LINKS = `    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@500;600;700&display=swap"
+      rel="stylesheet"
+    />`;
+
 export function generateIndexHtml(template: TemplateRecord): string {
   const dir = template.direction === "ltr" ? "ltr" : "rtl";
   const lang = dir === "ltr" ? "en" : "ar";
@@ -293,6 +300,7 @@ export function generatePreviewDocument(
   return `<!doctype html>
 <html lang="${template.direction === "ltr" ? "en" : "ar"}" dir="${template.direction === "ltr" ? "ltr" : "rtl"}">
 <head><meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+${FONT_LINKS}
 <style>${generateCss(template)}</style></head>
 <body><div id="zcard-root"></div>
 <script>window.ZCARD_DATA = ${JSON.stringify(data).replace(/</g, "\\u003c")};</script>
