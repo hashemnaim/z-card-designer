@@ -9,7 +9,9 @@ import {
 
 import { generateFiles, generateSchema, usageBuckets } from "@/builder/runtime/generate";
 import { builtInPresets, carsLuxuryPreset } from "@/builder/presets";
-import { themeForStyle, type FieldUsage, type TemplateRecord } from "@/builder/types";
+import { DEFAULT_THEME, themeForStyle, type FieldUsage, type TemplateRecord } from "@/builder/types";
+import { generateCarsLuxuryCss } from "@/builder/runtime/cars-luxury-css";
+import { VARIANT_WIDTHS } from "@/builder/export";
 
 /** Builds a template record without touching localStorage (store.ts is browser-only). */
 function makeTemplate(cardType: CardType, overrides: Partial<TemplateRecord> = {}): TemplateRecord {
