@@ -613,7 +613,7 @@
     root.className = "zc-root";
 
     var title = get("property_name");
-    var type = get("property_type");
+    var type = typeLabel(get("property_type"));
     var price = priceText();
     var place = locationText();
     var status = statusText();
