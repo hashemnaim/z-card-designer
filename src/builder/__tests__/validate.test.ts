@@ -269,11 +269,11 @@ describe("package parity with the standalone reference layout", () => {
 
     it(`${cardType}: manifest points at every packaged file`, () => {
       const manifest = JSON.parse(generateFiles(template)["manifest.json"]) as Record<string, unknown>;
-      expect(manifest.schema).toBe("schema.json");
-      expect(manifest.contract).toBe(`${cardType}.template.json`);
-      expect(manifest.demo_data).toBe("demo.json");
-      expect(manifest.demo_data_js).toBe("demo-data.js");
-      expect(manifest.runtime).toMatchObject({
+      expect(manifest["schema"]).toBe("schema.json");
+      expect(manifest["contract"]).toBe(`${cardType}.template.json`);
+      expect(manifest["demo_data"]).toBe("demo.json");
+      expect(manifest["demo_data_js"]).toBe("demo-data.js");
+      expect(manifest["runtime"]).toMatchObject({
         globalData: "window.ZCARD_DATA",
         renderer: "window.ZCardTemplate.render(data)",
         dependencies: [],
