@@ -288,3 +288,40 @@ describe("package parity with the standalone reference layout", () => {
     });
   }
 });
+
+describe("hero image controls", () => {
+  const template = builtInPresets().find((p) => p.cardType === "cars")!;
+
+  it("cars demo hero uses the packaged 9:19 asset", () => {
+    const demo = generateDemoData("cars", template);
+    expect(String(demo["cover_image"])).toContain("cars-luxury-hero");
+  });
+
+  it("theme defaults expose fit/focus/zoom", () => {
+    expect(DEFAULT_THEME.heroImageFit).toBe("cover");
+    expect(DEFAULT_THEME.heroImageFocus).toBe("center");
+    expect(DEFAULT_THEME.heroImageZoom).toBe(1);
+  });
+
+  it("css exposes the hero variables from the theme", () => {
+    const css = generateCarsLuxuryCss({
+      ...template,
+      theme: { ...template.theme, heroImageFit: "contain", heroImageFocus: "top", heroImageZoom: 1.2 },
+    });
+    expect(css).toContain("--zc-hero-fit: contain");
+    expect(css).toContain("--zc-hero-focus: 50% 18%");
+    expect(css).toContain("--zc-hero-zoom: 1.2");
+    expect(css).toContain("zc-img--loading");
+    expect(css).toContain("@keyframes zc-shimmer");
+  });
+
+  it("runtime marks images with a loading placeholder", () => {
+    const js = generateFiles(template)["template.js"];
+    expect(js).toContain("zc-img--loading");
+    expect(js).toContain("zc-img--error");
+  });
+
+  it("responsive variant widths are thumb/medium/large", () => {
+    expect(VARIANT_WIDTHS).toEqual({ thumb: 240, medium: 720, large: 1280 });
+  });
+});
