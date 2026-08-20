@@ -226,6 +226,40 @@ export function validateTemplate(template: TemplateRecord): ValidationReport {
     });
   }
 
+  // Assets: every image reference must be localizable into assets/ at export time
+  if (demoParsed) {
+    const images = collectImageRefs(demoParsed);
+    const unresolvable = images.filter(({ value }) => !isLocalizableImage(value));
+    checks.push({
+      id: "assets-resolvable",
+      group: "demo",
+      level: unresolvable.length ? "fail" : "pass",
+      message: unresolvable.length
+        ? "Some image references cannot be packaged into assets/"
+        : `${images.length} image references can be packaged into assets/ (WebP + JPG fallback)`,
+      detail: unresolvable.map((i) => i.key).join(", ") || undefined,
+      fields: unresolvable.map(({ key, value }) => ({
+        key,
+        reason: `"${value.slice(0, 60)}" is not an absolute http(s)/data URL, so the exporter cannot download it`,
+        hint: "Use a full https:// URL (or a data: URL) so the image lands in assets/ with local paths.",
+      })),
+    });
+
+    /* dry-run of the exported manifest asset map: names must line up with packaged files */
+    const plan = planAssetManifest(images.map((i) => i.value).filter(isLocalizableImage));
+    const planIssues = validateAssetManifest(plan.manifest, plan.packaged);
+    checks.push({
+      id: "assets-manifest",
+      group: "manifest",
+      level: planIssues.length ? "fail" : "pass",
+      message: planIssues.length
+        ? "manifest.json asset references would not match the packaged files"
+        : "manifest.json asset references (WebP + JPG fallback) all resolve to packaged files",
+      detail: planIssues.map((i) => i.message).join("; ") || undefined,
+      fields: planIssues.flatMap((i) => i.fields ?? []),
+    });
+  }
+
 
   // Runtime
   const hasRenderApi =
