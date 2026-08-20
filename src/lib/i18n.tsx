@@ -44,7 +44,21 @@ const DICT = {
   contract: { en: "Data Contract", ar: "عقد البيانات" },
   aiGenerate: { en: "Generate with AI", ar: "توليد بالذكاء الاصطناعي" },
   save: { en: "Saved", ar: "تم الحفظ" },
+  readyToExport: { en: "READY TO EXPORT", ar: "جاهز للتصدير" },
+  blocked: { en: "BLOCKED", ar: "التصدير موقوف" },
+  checks: { en: "checks", ar: "فحوصات" },
+  blockingErrors: { en: "Blocking errors", ar: "أخطاء تمنع التصدير" },
+  warningsLabel: { en: "Warnings", ar: "تحذيرات" },
+  noIssues: {
+    en: "No errors or warnings. This template is ready to export.",
+    ar: "لا أخطاء ولا تحذيرات. القالب جاهز للتصدير.",
+  },
+  fixBeforeExport: {
+    en: "Fix the blocking errors above before exporting.",
+    ar: "أصلح الأخطاء المانعة أعلاه قبل التصدير.",
+  },
 } as const;
+
 
 export type DictKey = keyof typeof DICT;
 
