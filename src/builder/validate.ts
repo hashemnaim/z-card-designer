@@ -1,7 +1,27 @@
 import { contractKeys, getContract } from "@/contracts";
 import type { TemplateRecord } from "./types";
-import { generateFiles, generateManifest, isLuxuryRealEstate, usageBuckets, usedFields } from "./runtime/generate";
+import {
+  generateFiles,
+  generateManifest,
+  humanize,
+  isLuxuryRealEstate,
+  usageBuckets,
+  usedFields,
+} from "./runtime/generate";
 import { REAL_ESTATE_LUXURY_EXTRAS } from "./demo-data";
+
+const MANIFEST_HINTS: Record<string, string> = {
+  id: "Template id is empty — set it in the template identity.",
+  name: "Template name is empty — set it in the template identity.",
+  version: "Version is empty — use a semantic version like 1.0.0.",
+  card_type: "Card type is missing — pick a card type for this template.",
+  schema_version: "schema_version must come from the official contract.",
+  entry: "Entry file (index.html) is not being generated.",
+  style: "Stylesheet (styles.css) is not being generated.",
+  script: "Runtime file (template.js) is not being generated.",
+  demo_data: "Demo file (demo.json) is not being generated.",
+};
+
 
 /** Contract keys plus any extra keys the selected layout renders natively. */
 export function allowedKeys(template: TemplateRecord): Set<string> {
@@ -14,13 +34,21 @@ export function allowedKeys(template: TemplateRecord): Set<string> {
 
 export type CheckLevel = "pass" | "warn" | "fail";
 
+export interface FieldIssue {
+  key: string;
+  reason: string;
+  hint?: string | undefined;
+}
+
 export interface CheckResult {
   id: string;
   group: "manifest" | "files" | "demo" | "runtime" | "security";
   level: CheckLevel;
   message: string;
   detail?: string | undefined;
+  fields?: FieldIssue[] | undefined;
 }
+
 
 export interface ValidationReport {
   checks: CheckResult[];
@@ -46,6 +74,8 @@ export function validateTemplate(template: TemplateRecord): ValidationReport {
   const manifest = generateManifest(template) as unknown as Record<string, unknown>;
   const allowed = allowedKeys(template);
   const contract = getContract(template.cardType);
+  const label = (key: string) =>
+    contract.fields.find((f) => f.key === key)?.name ?? humanize(key);
 
   // Manifest
   const missing = REQUIRED_MANIFEST_KEYS.filter((k) => {
@@ -58,7 +88,13 @@ export function validateTemplate(template: TemplateRecord): ValidationReport {
     level: missing.length ? "fail" : "pass",
     message: missing.length ? "Manifest is missing required keys" : "Manifest contains all required keys",
     detail: missing.join(", ") || undefined,
+    fields: missing.map((key) => ({
+      key,
+      reason: `manifest.json has no value for "${key}"`,
+      hint: MANIFEST_HINTS[key] ?? "Fill this value in the template properties before exporting.",
+    })),
   });
+
   checks.push({
     id: "manifest-version",
     group: "manifest",
@@ -116,6 +152,11 @@ export function validateTemplate(template: TemplateRecord): ValidationReport {
         ? "Demo JSON contains keys that are not in the official data contract"
         : "Demo JSON uses official contract API keys only",
       detail: invented.join(", ") || undefined,
+      fields: invented.map((key) => ({
+        key,
+        reason: `"${key}" is not an API key of the ${template.cardType} contract, and not an extra key this layout renders`,
+        hint: "Remove it from the demo JSON, or replace it with the matching official contract key.",
+      })),
     });
 
     const requiredKeys = usageBuckets(template).required;
@@ -128,6 +169,11 @@ export function validateTemplate(template: TemplateRecord): ValidationReport {
         ? "Demo JSON is missing values for fields this design marks as required"
         : "Demo JSON covers every required field of this design",
       detail: missingRequired.join(", ") || undefined,
+      fields: missingRequired.map((key) => ({
+        key,
+        reason: `${label(key)} is marked Required by this design but has no value in the demo JSON`,
+        hint: "Add a demo value, or lower the field to Recommended/Optional in the Fields pane.",
+      })),
     });
 
     const contractRequired = contract.field_usage.required.filter(
@@ -141,8 +187,14 @@ export function validateTemplate(template: TemplateRecord): ValidationReport {
         ? "Contract-required fields are not used by this design"
         : "All contract-required fields are used by this design",
       detail: contractRequired.join(", ") || undefined,
+      fields: contractRequired.map((key) => ({
+        key,
+        reason: `${label(key)} is required by the official contract but this design marks it as Not used`,
+        hint: "Enable the field in the Fields pane so real API data is never dropped.",
+      })),
     });
   }
+
 
   // Runtime
   const hasRenderApi =
