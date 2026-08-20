@@ -206,6 +206,7 @@ export function generateDemoData(
     if (usage === "unused") continue;
     out[field.key] = field.key in bank ? bank[field.key] : fallbackValue(field);
   }
+  if (cardType === "real-estate") Object.assign(out, REAL_ESTATE_LUXURY_EXTRAS);
   return out;
 }
 
