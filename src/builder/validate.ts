@@ -14,13 +14,21 @@ export function allowedKeys(template: TemplateRecord): Set<string> {
 
 export type CheckLevel = "pass" | "warn" | "fail";
 
+export interface FieldIssue {
+  key: string;
+  reason: string;
+  hint?: string | undefined;
+}
+
 export interface CheckResult {
   id: string;
   group: "manifest" | "files" | "demo" | "runtime" | "security";
   level: CheckLevel;
   message: string;
   detail?: string | undefined;
+  fields?: FieldIssue[] | undefined;
 }
+
 
 export interface ValidationReport {
   checks: CheckResult[];
