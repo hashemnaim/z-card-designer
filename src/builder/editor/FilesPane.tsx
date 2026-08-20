@@ -41,9 +41,10 @@ export function FilesPane({ template }: { template: TemplateRecord }) {
     try {
       const result = await exportTemplateZip(template);
       toast.success(`${result.fileName} exported`, {
-        description: `${result.files.length} files · ${result.assets} images in assets/${
+        description: `${result.files.length} files · ${result.assets} images (+${result.variants} responsive) in assets/${
           result.assetsFailed ? ` · ${result.assetsFailed} failed` : ""
         } · ${(result.bytes / 1024).toFixed(1)} KB`,
+
       });
     } catch (error) {
       console.error(error);
