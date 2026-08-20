@@ -86,9 +86,26 @@ async function encodeBlob(
   }
 }
 
+/** Stable content fingerprint so the same picture is never packaged twice. */
+async function hashBytes(bytes: ArrayBuffer): Promise<string> {
+  try {
+    if (globalThis.crypto?.subtle) {
+      const digest = await globalThis.crypto.subtle.digest("SHA-256", bytes);
+      return Array.from(new Uint8Array(digest).slice(0, 12))
+        .map((b) => b.toString(16).padStart(2, "0"))
+        .join("");
+    }
+  } catch {
+    /* fall through to size-based key */
+  }
+  return `len-${bytes.byteLength}`;
+}
+
 /** Walks demo data, downloads every image (plus WebP/JPG responsive variants) into assets/. */
 async function localizeImages(data: unknown, assetsFolder: JSZip | null) {
   const cache = new Map<string, string>();
+  /** content hash -> already packaged entry (dedupes identical images across fields/URLs) */
+  const byContent = new Map<string, AssetVariantEntry>();
   const manifestAssets: AssetVariantEntry[] = [];
   const packaged = new Set<string>();
   let downloaded = 0;
@@ -110,12 +127,23 @@ async function localizeImages(data: unknown, assetsFolder: JSZip | null) {
       const res = await fetch(url);
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const blob = await res.blob();
+      const bytes = await blob.arrayBuffer();
+      const hash = await hashBytes(bytes);
+      const existing = byContent.get(hash);
+      if (existing) {
+        /* identical bytes already in assets/ — reuse it instead of writing a copy */
+        cache.set(url, existing.fallback);
+        if (!existing.sources.includes(url)) existing.sources.push(url);
+        return existing.fallback;
+      }
+
       counter += 1;
       const ext = extFromType(blob.type || url);
       const base = `image-${String(counter).padStart(2, "0")}`;
-      const original = put(`${base}.${ext}`, await blob.arrayBuffer());
+      const original = put(`${base}.${ext}`, bytes);
       const entry: AssetVariantEntry = {
         source: url,
+        sources: [url],
         file: original,
         fallback: original,
         variants: {},
@@ -145,6 +173,7 @@ async function localizeImages(data: unknown, assetsFolder: JSZip | null) {
         }
       }
 
+      byContent.set(hash, entry);
       manifestAssets.push(entry);
       /* demo data points at the fallback so any consumer can load it without WebP support */
       cache.set(url, entry.fallback);
@@ -157,6 +186,7 @@ async function localizeImages(data: unknown, assetsFolder: JSZip | null) {
       return null;
     }
   }
+
 
 
   async function walk(value: unknown): Promise<unknown> {
