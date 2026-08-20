@@ -6,6 +6,9 @@ import { generateFiles } from "@/builder/runtime/generate";
 import { exportTemplateZip } from "@/builder/export";
 import { validateTemplate } from "@/builder/validate";
 import type { TemplateRecord } from "@/builder/types";
+import { useI18n } from "@/lib/i18n";
+import { ExportSummary } from "./ExportSummary";
+
 
 export function FilesPane({ template }: { template: TemplateRecord }) {
   const files = useMemo(() => generateFiles(template), [template]);
