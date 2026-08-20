@@ -1,6 +1,15 @@
 import { describe, expect, it } from "vitest";
 import { CARD_TYPES, getContract, type CardType } from "@/contracts";
-import { allowedKeys, validatePayload, validateTemplate } from "@/builder/validate";
+import {
+  ASSET_VARIANT_LABELS,
+  allowedKeys,
+  collectImageRefs,
+  isLocalizableImage,
+  planAssetManifest,
+  validateAssetManifest,
+  validatePayload,
+  validateTemplate,
+} from "@/builder/validate";
 import {
   CARS_LUXURY_EXTRAS,
   generateDemoData,
@@ -326,4 +335,72 @@ describe("hero image controls", () => {
   it("responsive variant widths are thumb/medium/large", () => {
     expect(VARIANT_WIDTHS).toEqual({ thumb: 240, medium: 720, large: 1280 });
   });
+});
+
+describe("asset manifest validation", () => {
+  const carsTemplate = builtInPresets().find((p) => p.cardType === "cars")!;
+
+  it("planned manifest for cars luxury has webp + jpg for every step and validates clean", () => {
+    const demo = JSON.parse(generateFiles(carsTemplate).demoJson) as Record<string, unknown>;
+    const refs = collectImageRefs(demo);
+    expect(refs.length).toBeGreaterThan(0);
+    const plan = planAssetManifest(refs.map((r) => r.value).filter(isLocalizableImage));
+    const images = (plan.manifest["assets"] as { images: Array<Record<string, unknown>> }).images;
+    expect(images.length).toBeGreaterThan(0);
+    for (const entry of images) {
+      expect(String(entry["file"])).toMatch(/\.webp$/);
+      expect(String(entry["fallback"])).toMatch(/\.jpg$/);
+      for (const label of ASSET_VARIANT_LABELS) {
+        const pair = (entry["variants"] as Record<string, { webp: string; jpg: string }>)[label];
+        expect(pair.webp).toMatch(/\.webp$/);
+        expect(pair.jpg).toMatch(/\.jpg$/);
+      }
+    }
+    expect(validateAssetManifest(plan.manifest, plan.packaged)).toEqual([]);
+  });
+
+  it("flags manifest references that are absent from the package", () => {
+    const manifest = {
+      assets: {
+        images: [
+          {
+            source: "https://x/y.jpg",
+            file: "assets/image-01.webp",
+            fallback: "assets/image-01.jpg",
+            variants: { thumb: { webp: "assets/image-01-thumb.webp", jpg: "assets/image-01-thumb.jpg" } },
+          },
+        ],
+      },
+    };
+    const issues = validateAssetManifest(manifest, ["assets/image-01.jpg"]);
+    expect(issues.some((i) => i.id === "assets-missing-files")).toBe(true);
+    expect(issues[0]?.fields?.map((f) => f.key)).toContain("assets/image-01.webp");
+  });
+
+  it("flags a WebP variant without a JPG fallback", () => {
+    const manifest = {
+      assets: {
+        images: [
+          {
+            source: "https://x/y.jpg",
+            file: "assets/a.webp",
+            fallback: "assets/a.jpg",
+            variants: { large: { webp: "assets/a-large.webp" } },
+          },
+        ],
+      },
+    };
+    const issues = validateAssetManifest(manifest, ["assets/a.webp", "assets/a.jpg", "assets/a-large.webp"]);
+    expect(issues.some((i) => i.id === "assets-missing-fallback")).toBe(true);
+  });
+
+  for (const template of builtInPresets()) {
+    it(`${template.id}: validation includes passing asset checks`, () => {
+      const report = validateTemplate(template);
+      const ids = report.checks.filter((c) => c.level === "pass").map((c) => c.id);
+      expect(ids).toContain("assets-resolvable");
+      expect(ids).toContain("assets-manifest");
+      expect(report.ok).toBe(true);
+    });
+  }
 });
