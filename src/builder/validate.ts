@@ -1,6 +1,16 @@
 import { contractKeys, getContract } from "@/contracts";
 import type { TemplateRecord } from "./types";
-import { generateFiles, generateManifest, usageBuckets, usedFields } from "./runtime/generate";
+import { generateFiles, generateManifest, isLuxuryRealEstate, usageBuckets, usedFields } from "./runtime/generate";
+import { REAL_ESTATE_LUXURY_EXTRAS } from "./demo-data";
+
+/** Contract keys plus any extra keys the selected layout renders natively. */
+export function allowedKeys(template: TemplateRecord): Set<string> {
+  const keys = new Set(contractKeys(template.cardType));
+  if (isLuxuryRealEstate(template)) {
+    for (const key of Object.keys(REAL_ESTATE_LUXURY_EXTRAS)) keys.add(key);
+  }
+  return keys;
+}
 
 export type CheckLevel = "pass" | "warn" | "fail";
 
