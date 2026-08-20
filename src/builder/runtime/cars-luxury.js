@@ -504,7 +504,8 @@
       else if (fi < 8) m[fi + 1][8] = fbit;
       else m[size - 15 + fi][8] = fbit;
       if (fi < 8) m[8][size - 1 - fi] = fbit;
-      else m[8][15 - fi] = fbit;
+      else if (fi === 8) m[8][7] = fbit;
+      else m[8][14 - fi] = fbit;
     }
     m[size - 8][8] = 1;
 
