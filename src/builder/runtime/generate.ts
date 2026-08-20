@@ -1,6 +1,13 @@
 import runtimeSource from "./template-runtime.js?raw";
+import luxuryRuntimeSource from "./real-estate-luxury.js?raw";
+import { generateRealEstateLuxuryCss } from "./real-estate-luxury-css";
 import { getContract, SECTION_LABELS, type ContractField } from "@/contracts";
 import type { TemplateRecord } from "../types";
+
+/** The real-estate card type ships the dedicated luxury mobile-card layout. */
+export function isLuxuryRealEstate(template: TemplateRecord): boolean {
+  return template.cardType === "real-estate";
+}
 
 export interface GeneratedFiles {
   "index.html": string;
