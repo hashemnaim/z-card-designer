@@ -1,0 +1,621 @@
+{
+  "template_contract_version": "1.0.0",
+  "schema_version": "cars-v1",
+  "card_type": "cars",
+  "category": {
+    "id": 3,
+    "slug": "cars",
+    "name": "سيارات",
+    "icon": "🚗",
+    "type": "both"
+  },
+  "runtime_rules": {
+    "api_payload_source": "Z Card API",
+    "hide_missing_fields": true,
+    "hide_empty_sections": true,
+    "ignore_unknown_fields": true,
+    "render_only_declared_fields": true,
+    "allow_multiple_designs_for_same_card_type": true,
+    "designs_must_not_rename_api_keys": true
+  },
+  "field_usage": {
+    "required": [
+      "Phone",
+      "WhatsApp"
+    ],
+    "optional": [
+      "description",
+      "youtube_url",
+      "tiktok_url",
+      "x_url",
+      "facebook_url",
+      "instagram_url",
+      "linkedin_url",
+      "video_url",
+      "gallery_images",
+      "currency",
+      "price",
+      "location",
+      "sunroof",
+      "seller_verified",
+      "exterior_color",
+      "title",
+      "cruise_control",
+      "seller_avatar",
+      "interior_color",
+      "interior_gallery",
+      "rear_camera",
+      "seller_name",
+      "engine_size",
+      "brand",
+      "parking_sensors",
+      "seller_title",
+      "fuel_type",
+      "model",
+      "navigation",
+      "seller_company",
+      "transmission",
+      "year",
+      "leather_seats",
+      "drivetrain",
+      "featured_image",
+      "bluetooth",
+      "horsepower",
+      "keyless_entry",
+      "mileage",
+      "verified",
+      "android_auto",
+      "trim",
+      "apple_carplay",
+      "body_type",
+      "condition"
+    ]
+  },
+  "sections": [
+    {
+      "id": "vehicle",
+      "fields": [
+        "description",
+        "title",
+        "brand",
+        "model",
+        "year",
+        "verified",
+        "trim",
+        "body_type",
+        "condition"
+      ],
+      "hide_when_empty": true
+    },
+    {
+      "id": "social",
+      "fields": [
+        "youtube_url",
+        "tiktok_url",
+        "x_url",
+        "facebook_url",
+        "instagram_url",
+        "linkedin_url"
+      ],
+      "hide_when_empty": true
+    },
+    {
+      "id": "media",
+      "fields": [
+        "video_url",
+        "gallery_images",
+        "interior_gallery",
+        "featured_image"
+      ],
+      "hide_when_empty": true
+    },
+    {
+      "id": "contact",
+      "fields": [
+        "Phone",
+        "WhatsApp",
+        "location"
+      ],
+      "hide_when_empty": true
+    },
+    {
+      "id": "pricing",
+      "fields": [
+        "currency",
+        "price"
+      ],
+      "hide_when_empty": true
+    },
+    {
+      "id": "features",
+      "fields": [
+        "sunroof",
+        "cruise_control",
+        "rear_camera",
+        "parking_sensors",
+        "navigation",
+        "leather_seats",
+        "bluetooth",
+        "keyless_entry",
+        "android_auto",
+        "apple_carplay"
+      ],
+      "hide_when_empty": true
+    },
+    {
+      "id": "seller",
+      "fields": [
+        "seller_verified",
+        "seller_avatar",
+        "seller_name",
+        "seller_title",
+        "seller_company"
+      ],
+      "hide_when_empty": true
+    },
+    {
+      "id": "specifications",
+      "fields": [
+        "exterior_color",
+        "interior_color",
+        "engine_size",
+        "fuel_type",
+        "transmission",
+        "drivetrain",
+        "horsepower",
+        "mileage"
+      ],
+      "hide_when_empty": true
+    }
+  ],
+  "fields": [
+    {
+      "id": 133,
+      "key": "description",
+      "name": "وصف السياره",
+      "type": "textarea",
+      "options": null,
+      "is_required": false,
+      "is_global": false
+    },
+    {
+      "id": 79,
+      "key": "youtube_url",
+      "name": "يوتيوب",
+      "type": "youtube",
+      "options": null,
+      "is_required": false,
+      "is_global": true
+    },
+    {
+      "id": 78,
+      "key": "tiktok_url",
+      "name": "تيك توك",
+      "type": "tiktok",
+      "options": null,
+      "is_required": false,
+      "is_global": true
+    },
+    {
+      "id": 77,
+      "key": "x_url",
+      "name": "إكس",
+      "type": "twitter",
+      "options": null,
+      "is_required": false,
+      "is_global": true
+    },
+    {
+      "id": 76,
+      "key": "facebook_url",
+      "name": "فيسبوك",
+      "type": "facebook",
+      "options": null,
+      "is_required": false,
+      "is_global": true
+    },
+    {
+      "id": 75,
+      "key": "instagram_url",
+      "name": "إنستجرام",
+      "type": "instagram",
+      "options": null,
+      "is_required": false,
+      "is_global": true
+    },
+    {
+      "id": 74,
+      "key": "linkedin_url",
+      "name": "لينكدإن",
+      "type": "linkedin",
+      "options": null,
+      "is_required": false,
+      "is_global": true
+    },
+    {
+      "id": 73,
+      "key": "video_url",
+      "name": "رابط الفيديو",
+      "type": "video_url",
+      "options": null,
+      "is_required": false,
+      "is_global": true
+    },
+    {
+      "id": 72,
+      "key": "gallery_images",
+      "name": "صور المعرض",
+      "type": "gallery",
+      "options": null,
+      "is_required": false,
+      "is_global": true
+    },
+    {
+      "id": 9,
+      "key": "Phone",
+      "name": "هاتف",
+      "type": "phone",
+      "options": null,
+      "is_required": true,
+      "is_global": true
+    },
+    {
+      "id": 8,
+      "key": "WhatsApp",
+      "name": "واتساب",
+      "type": "phone",
+      "options": null,
+      "is_required": true,
+      "is_global": true
+    },
+    {
+      "id": 84,
+      "key": "currency",
+      "name": "العملة",
+      "type": "multiselect",
+      "options": [
+        "eg",
+        "$"
+      ],
+      "is_required": false,
+      "is_global": true
+    },
+    {
+      "id": 83,
+      "key": "price",
+      "name": "السعر",
+      "type": "currency",
+      "options": null,
+      "is_required": false,
+      "is_global": true
+    },
+    {
+      "id": 56,
+      "key": "location",
+      "name": "الموقع",
+      "type": "text",
+      "options": null,
+      "is_required": false,
+      "is_global": true
+    },
+    {
+      "id": 123,
+      "key": "sunroof",
+      "name": "فتحة سقف",
+      "type": "checkbox",
+      "options": null,
+      "is_required": false,
+      "is_global": false
+    },
+    {
+      "id": 139,
+      "key": "seller_verified",
+      "name": "بائع موثق",
+      "type": "switch",
+      "options": null,
+      "is_required": false,
+      "is_global": false
+    },
+    {
+      "id": 121,
+      "key": "exterior_color",
+      "name": "اللون الخارجي",
+      "type": "text",
+      "options": null,
+      "is_required": false,
+      "is_global": false
+    },
+    {
+      "id": 107,
+      "key": "title",
+      "name": "عنوان الإعلان",
+      "type": "text",
+      "options": null,
+      "is_required": false,
+      "is_global": false
+    },
+    {
+      "id": 129,
+      "key": "cruise_control",
+      "name": "مثبت سرعة",
+      "type": "checkbox",
+      "options": null,
+      "is_required": false,
+      "is_global": false
+    },
+    {
+      "id": 138,
+      "key": "seller_avatar",
+      "name": "صورة البائع",
+      "type": "image",
+      "options": null,
+      "is_required": false,
+      "is_global": false
+    },
+    {
+      "id": 122,
+      "key": "interior_color",
+      "name": "اللون الداخلي",
+      "type": "text",
+      "options": null,
+      "is_required": false,
+      "is_global": false
+    },
+    {
+      "id": 134,
+      "key": "interior_gallery",
+      "name": "صور الداخلية",
+      "type": "gallery",
+      "options": null,
+      "is_required": false,
+      "is_global": false
+    },
+    {
+      "id": 127,
+      "key": "rear_camera",
+      "name": "كاميرا خلفية",
+      "type": "checkbox",
+      "options": null,
+      "is_required": false,
+      "is_global": false
+    },
+    {
+      "id": 135,
+      "key": "seller_name",
+      "name": "اسم البائع",
+      "type": "text",
+      "options": null,
+      "is_required": false,
+      "is_global": false
+    },
+    {
+      "id": 118,
+      "key": "engine_size",
+      "name": "سعة المحرك",
+      "type": "integer",
+      "options": null,
+      "is_required": false,
+      "is_global": false
+    },
+    {
+      "id": 108,
+      "key": "brand",
+      "name": "الماركة",
+      "type": "select",
+      "options": [
+        "هيواندي",
+        "شيفروليه",
+        "كيا",
+        "مرسيدس",
+        "بي ام دبليو"
+      ],
+      "is_required": false,
+      "is_global": false
+    },
+    {
+      "id": 126,
+      "key": "parking_sensors",
+      "name": "حساسات ركن",
+      "type": "checkbox",
+      "options": null,
+      "is_required": false,
+      "is_global": false
+    },
+    {
+      "id": 136,
+      "key": "seller_title",
+      "name": "المسمى الوظيفي",
+      "type": "text",
+      "options": null,
+      "is_required": false,
+      "is_global": false
+    },
+    {
+      "id": 117,
+      "key": "fuel_type",
+      "name": "نوع الوقود",
+      "type": "select",
+      "options": [
+        "بنزين",
+        "كهرباء (EV)",
+        "Hybrid"
+      ],
+      "is_required": false,
+      "is_global": false
+    },
+    {
+      "id": 109,
+      "key": "model",
+      "name": "الموديل",
+      "type": "text",
+      "options": null,
+      "is_required": false,
+      "is_global": false
+    },
+    {
+      "id": 125,
+      "key": "navigation",
+      "name": "نظام ملاحة",
+      "type": "checkbox",
+      "options": null,
+      "is_required": false,
+      "is_global": false
+    },
+    {
+      "id": 137,
+      "key": "seller_company",
+      "name": "الشركة",
+      "type": "text",
+      "options": null,
+      "is_required": false,
+      "is_global": false
+    },
+    {
+      "id": 116,
+      "key": "transmission",
+      "name": "ناقل الحركه",
+      "type": "select",
+      "options": [
+        "اتوماتيك",
+        "مانيوال",
+        "ستبترونيك"
+      ],
+      "is_required": false,
+      "is_global": false
+    },
+    {
+      "id": 110,
+      "key": "year",
+      "name": "سنة الصنع",
+      "type": "integer",
+      "options": null,
+      "is_required": false,
+      "is_global": false
+    },
+    {
+      "id": 124,
+      "key": "leather_seats",
+      "name": "مقاعد جلد",
+      "type": "checkbox",
+      "options": null,
+      "is_required": false,
+      "is_global": false
+    },
+    {
+      "id": 120,
+      "key": "drivetrain",
+      "name": "نظام الدفع",
+      "type": "select",
+      "options": [
+        "4*4",
+        "امامي"
+      ],
+      "is_required": false,
+      "is_global": false
+    },
+    {
+      "id": 106,
+      "key": "featured_image",
+      "name": "صورة السيارة الرئيسية",
+      "type": "image",
+      "options": null,
+      "is_required": false,
+      "is_global": false
+    },
+    {
+      "id": 130,
+      "key": "bluetooth",
+      "name": "بلوتوث",
+      "type": "checkbox",
+      "options": null,
+      "is_required": false,
+      "is_global": false
+    },
+    {
+      "id": 119,
+      "key": "horsepower",
+      "name": "القوة (HP)",
+      "type": "integer",
+      "options": null,
+      "is_required": false,
+      "is_global": false
+    },
+    {
+      "id": 128,
+      "key": "keyless_entry",
+      "name": "دخول ذكي",
+      "type": "checkbox",
+      "options": null,
+      "is_required": false,
+      "is_global": false
+    },
+    {
+      "id": 115,
+      "key": "mileage",
+      "name": "الكيلومتر",
+      "type": "integer",
+      "options": null,
+      "is_required": false,
+      "is_global": false
+    },
+    {
+      "id": 112,
+      "key": "verified",
+      "name": "موثق",
+      "type": "switch",
+      "options": null,
+      "is_required": false,
+      "is_global": false
+    },
+    {
+      "id": 132,
+      "key": "android_auto",
+      "name": "Android Auto",
+      "type": "checkbox",
+      "options": null,
+      "is_required": false,
+      "is_global": false
+    },
+    {
+      "id": 114,
+      "key": "trim",
+      "name": "الفئة",
+      "type": "text",
+      "options": null,
+      "is_required": false,
+      "is_global": false
+    },
+    {
+      "id": 131,
+      "key": "apple_carplay",
+      "name": "Apple CarPlay",
+      "type": "checkbox",
+      "options": null,
+      "is_required": false,
+      "is_global": false
+    },
+    {
+      "id": 113,
+      "key": "body_type",
+      "name": "نوع الهيكل",
+      "type": "select",
+      "options": [
+        "سيدان",
+        "4*4"
+      ],
+      "is_required": false,
+      "is_global": false
+    },
+    {
+      "id": 111,
+      "key": "condition",
+      "name": "الحالة",
+      "type": "select",
+      "options": [
+        "حاله جيده"
+      ],
+      "is_required": false,
+      "is_global": false
+    }
+  ]
+}
