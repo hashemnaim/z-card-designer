@@ -608,34 +608,65 @@
     return get("title") || [get("year"), get("brand"), get("model")].filter(has).join(" ") || "Z Card";
   }
 
+  /** Link the card shares / encodes: share_card first, then the current page. */
+  function shareLink() {
+    var explicit = safeUrl(get("share_card", "share_url", "card_url", "card_link"));
+    if (explicit) return explicit;
+    return typeof location !== "undefined" ? location.href : "";
+  }
+
+  function copyLink(url) {
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(url).then(function () {
+        toast(L.copied);
+      }, function () {});
+      return;
+    }
+    var field = el("input");
+    field.value = url;
+    field.setAttribute("readonly", "readonly");
+    field.style.position = "fixed";
+    field.style.opacity = "0";
+    document.body.appendChild(field);
+    field.select();
+    try {
+      document.execCommand("copy");
+      toast(L.copied);
+    } catch (e) {
+      /* ignore */
+    }
+    document.body.removeChild(field);
+  }
+
   function openQr() {
-    var link = typeof location !== "undefined" ? location.href : "";
+    var link = shareLink();
     openOverlay(function (body) {
       var box = el("div", "zc-qr");
       var frame = el("div", "zc-qr__frame");
-      var src =
-        "https://api.qrserver.com/v1/create-qr-code/?size=440x440&margin=8&data=" +
-        encodeURIComponent(link);
-      var node = img(src, "zc-qr__img", "QR");
-      if (node) frame.appendChild(node);
+      var canvas = qrCanvas(link, 260);
+      canvas.setAttribute("aria-label", String(cardTitle()));
+      frame.appendChild(canvas);
       box.appendChild(frame);
       box.appendChild(el("p", "zc-qr__caption", cardTitle()));
+      var copy = el("button", "zc-qr__copy", L.copyLink);
+      copy.setAttribute("type", "button");
+      copy.addEventListener("click", function () {
+        copyLink(link);
+      });
+      box.appendChild(copy);
       body.appendChild(box);
     });
   }
 
   function share() {
-    var url = typeof location !== "undefined" ? location.href : "";
+    var url = shareLink();
     if (navigator.share) {
       navigator.share({ title: String(cardTitle()), url: url }).catch(function () {});
       return;
     }
-    if (navigator.clipboard) {
-      navigator.clipboard.writeText(url).then(function () {
-        toast(L.copied);
-      }, function () {});
-    }
+    copyLink(url);
   }
+
 
   /* ---------------- accordion ---------------- */
   var accordions = [];
