@@ -22,8 +22,104 @@ export interface GeneratedFiles {
   "styles.css": string;
   "template.js": string;
   "manifest.json": string;
+  "schema.json": string;
+  "demo-data.js": string;
+  contractFileName: string;
+  contractJson: string;
   demoFileName: string;
   demoJson: string;
+}
+
+/** Official contract file name shipped inside the package, per card type. */
+export function contractFileName(template: TemplateRecord): string {
+  return `${template.cardType}.template.json`;
+}
+
+/** Verbatim copy of the official data contract for the selected card type. */
+export function generateContractJson(template: TemplateRecord): string {
+  return JSON.stringify(getContract(template.cardType), null, 2);
+}
+
+type SchemaProperty = {
+  type: string | string[];
+  format?: string;
+  enum?: string[];
+  items?: { type: string };
+  description?: string;
+};
+
+function schemaPropertyFor(field: ContractField): SchemaProperty {
+  switch (field.type) {
+    case "integer":
+      return { type: "integer" };
+    case "currency":
+      return { type: "number" };
+    case "switch":
+    case "checkbox":
+      return { type: "boolean" };
+    case "gallery":
+    case "multiselect":
+      return { type: "array", items: { type: "string" } };
+    case "image":
+    case "url":
+    case "video_url":
+    case "google_map":
+    case "youtube":
+    case "tiktok":
+    case "twitter":
+    case "facebook":
+    case "instagram":
+    case "linkedin":
+      return { type: "string", format: "uri-reference" };
+    case "email":
+      return { type: "string", format: "email" };
+    case "date":
+      return { type: "string", format: "date" };
+    case "select":
+      return field.options?.length
+        ? { type: "string", enum: field.options }
+        : { type: "string" };
+    default:
+      return { type: "string" };
+  }
+}
+
+/** JSON Schema generated from the card-type contract (flat official keys). */
+export function generateSchema(template: TemplateRecord) {
+  const contract = getContract(template.cardType);
+  const properties: Record<string, SchemaProperty> = {};
+  const required: string[] = [];
+
+  for (const field of contract.fields) {
+    const usage = template.fieldUsage[field.key] ?? "unused";
+    if (usage === "unused") continue;
+    properties[field.key] = { ...schemaPropertyFor(field), description: field.name };
+    if (usage === "required") required.push(field.key);
+  }
+
+  return {
+    $schema: "https://json-schema.org/draft/2020-12/schema",
+    $id: `https://zcard.app/schema/${contract.schema_version}.json`,
+    title: `Z Card ${contract.card_type} data contract`,
+    description: `Generated from ${template.cardType}.template.json. Templates must never rename these API keys.`,
+    "x-schemaVersion": contract.schema_version,
+    "x-cardType": contract.card_type,
+    type: "object",
+    required,
+    additionalProperties: true,
+    properties,
+  };
+}
+
+/** Demo bootstrap file mirroring the reference package (window.ZCARD_DEMO_DATA). */
+export function generateDemoDataJs(data: unknown): string {
+  return `/*
+ * DEMO data only \u2014 for local preview of the standalone template.
+ * Production cards come from the Z Card API via window.ZCARD_DATA.
+ * The renderer never reads this file.
+ */
+window.ZCARD_DEMO_DATA = ${JSON.stringify(data, null, 2)};
+`;
 }
 
 const HERO_PRIMARY: Record<
@@ -255,12 +351,21 @@ ${FONT_LINKS}
     <link rel="stylesheet" href="styles.css" />
   </head>
   <body>
+    <!-- Mount point. Z Card injects the card payload before template.js runs. -->
     <div id="zcard-root"></div>
+
+    <!--
+      RUNTIME DATA
+      The Z Card host page sets window.ZCARD_DATA from the API payload:
+        <script>window.ZCARD_DATA = CARD_DATA_FROM_API;</script>
+    -->
+
+    <!-- DEMO ONLY: local preview fallback, safe to delete in production hosting. -->
+    <script src="demo-data.js"></script>
     <script>
-      // Z Card Admin injects production data here:
-      // window.ZCARD_DATA = CARD_DATA_FROM_API;
-      window.ZCARD_DATA = window.ZCARD_DATA || null;
+      window.ZCARD_DATA = window.ZCARD_DATA || window.ZCARD_DEMO_DATA || null;
     </script>
+
     <script src="template.js"></script>
   </body>
 </html>
@@ -285,7 +390,15 @@ export function generateManifest(template: TemplateRecord) {
     entry: "index.html",
     style: "styles.css",
     script: "template.js",
+    schema: "schema.json",
+    contract: contractFileName(template),
     demo_data: "demo.json",
+    demo_data_js: "demo-data.js",
+    runtime: {
+      globalData: "window.ZCARD_DATA",
+      renderer: "window.ZCardTemplate.render(data)",
+      dependencies: [] as string[],
+    },
     supports: {
       rtl: template.direction !== "ltr",
       ltr: template.direction !== "rtl",
@@ -311,6 +424,10 @@ export function generateFiles(template: TemplateRecord): GeneratedFiles {
     "styles.css": generateCss(template),
     "template.js": generateTemplateJs(template),
     "manifest.json": JSON.stringify(generateManifest(template), null, 2),
+    "schema.json": JSON.stringify(generateSchema(template), null, 2),
+    "demo-data.js": generateDemoDataJs(template.demoData),
+    contractFileName: contractFileName(template),
+    contractJson: generateContractJson(template),
     demoFileName: "demo.json",
     demoJson: JSON.stringify(template.demoData, null, 2),
   };
