@@ -203,10 +203,8 @@ export async function exportTemplateZip(template: TemplateRecord): Promise<Expor
       `Responsive variants: thumb ${VARIANT_WIDTHS.thumb}px, medium ${VARIANT_WIDTHS.medium}px, large ${VARIANT_WIDTHS.large}px.\n`,
   );
 
-  const { localized, downloaded, failed, variants, manifestAssets } = await localizeImages(
-    template.demoData,
-    assets,
-  );
+  const { localized, downloaded, failed, variants, webp, manifestAssets, packaged } =
+    await localizeImages(template.demoData, assets);
   folder.file(generated.demoFileName, JSON.stringify(localized, null, 2));
   folder.file("demo-data.js", generateDemoDataJs(localized));
 
@@ -216,10 +214,19 @@ export async function exportTemplateZip(template: TemplateRecord): Promise<Expor
     assets: {
       folder: "assets/",
       variant_widths: VARIANT_WIDTHS,
+      preferred_format: "webp",
+      fallback_format: "jpg",
       images: manifestAssets,
     },
   };
   folder.file("manifest.json", JSON.stringify(manifest, null, 2));
+
+  /* every asset path in the manifest must exist in the ZIP before we hand it to the user */
+  const assetIssues = validateAssetManifest(manifest, packaged);
+  if (assetIssues.length) {
+    throw new Error(`Asset manifest mismatch: ${assetIssues.map((i) => i.message).join("; ")}`);
+  }
+
 
 
   const referenceImage = template.reference.imageDataUrl;
