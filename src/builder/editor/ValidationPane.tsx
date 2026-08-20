@@ -16,24 +16,10 @@ const TONE: Record<CheckLevel, string> = {
 
 export function ValidationPane({ template }: { template: TemplateRecord }) {
   const report = validateTemplate(template);
-  const failures = report.checks.filter((c) => c.level === "fail").length;
 
   return (
     <div className="flex h-full flex-col gap-3 overflow-auto p-3">
-      <div className="flex items-center gap-3">
-        <span
-          className={`rounded-md border px-2 py-1 font-mono text-[11px] ${
-            report.ok
-              ? "border-primary/40 bg-primary/10 text-primary"
-              : "border-destructive/40 bg-destructive/10 text-destructive"
-          }`}
-        >
-          {report.ok ? "READY TO EXPORT" : "BLOCKED"}
-        </span>
-        <span className="text-xs text-muted-foreground">
-          {report.checks.length} checks · {failures} failed · {report.warnings} warnings
-        </span>
-      </div>
+      <ExportSummary template={template} />
 
       <div className="divide-y divide-border overflow-hidden rounded-lg border border-border">
         {report.checks.map((check) => {
@@ -43,10 +29,28 @@ export function ValidationPane({ template }: { template: TemplateRecord }) {
               <Icon className={`mt-0.5 size-3.5 shrink-0 ${TONE[check.level]}`} />
               <div className="min-w-0">
                 <p className="text-xs">{check.message}</p>
-                {check.detail && (
-                  <p className="mt-0.5 break-words font-mono text-[10px] text-muted-foreground">
-                    {check.detail}
-                  </p>
+                {check.fields?.length ? (
+                  <ul className="mt-1 space-y-1">
+                    {check.fields.map((field) => (
+                      <li key={field.key} className="min-w-0">
+                        <p className="break-words text-[11px]">
+                          <span className={`font-mono ${TONE[check.level]}`}>{field.key}</span>
+                          <span className="text-muted-foreground"> — {field.reason}</span>
+                        </p>
+                        {field.hint && (
+                          <p className="break-words text-[10px] text-muted-foreground">
+                            {field.hint}
+                          </p>
+                        )}
+                      </li>
+                    ))}
+                  </ul>
+                ) : (
+                  check.detail && (
+                    <p className="mt-0.5 break-words font-mono text-[10px] text-muted-foreground">
+                      {check.detail}
+                    </p>
+                  )
                 )}
               </div>
               <span className="ml-auto shrink-0 font-mono text-[10px] uppercase text-muted-foreground">
@@ -59,3 +63,4 @@ export function ValidationPane({ template }: { template: TemplateRecord }) {
     </div>
   );
 }
+
