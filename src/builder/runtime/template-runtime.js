@@ -38,6 +38,10 @@
   function safeUrl(raw) {
     if (!has(raw)) return null;
     var value = String(raw).trim();
+    /* Exported demo images use relative assets/... paths. Keep them relative so
+       they resolve beside index.html when the package is opened via file://. */
+    if (/^(?:\.\.?\/)?assets\/[A-Za-z0-9._~!$&'()+,;=@%/-]+(?:\?[^#]*)?(?:#.*)?$/.test(value))
+      return value;
     try {
       var url = new URL(value, "https://placeholder.invalid");
       if (SAFE_SCHEMES.indexOf(url.protocol) === -1) return null;

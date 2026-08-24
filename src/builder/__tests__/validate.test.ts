@@ -332,6 +332,12 @@ describe("hero image controls", () => {
     expect(js).toContain("zc-img--error");
   });
 
+  it("standalone runtime preserves relative assets paths for file preview", () => {
+    const js = generateFiles(template)["template.js"];
+    expect(js).toContain("Keep packaged assets relative");
+    expect(js).toContain("return value;");
+  });
+
   it("responsive variant widths are thumb/medium/large", () => {
     expect(VARIANT_WIDTHS).toEqual({ thumb: 240, medium: 720, large: 1280 });
   });
