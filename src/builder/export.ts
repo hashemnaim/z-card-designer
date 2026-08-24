@@ -259,12 +259,8 @@ export async function exportTemplateZip(template: TemplateRecord): Promise<Expor
   folder.file(generated.contractFileName, generated.contractJson);
 
   const assets = folder.folder("assets");
-  assets?.file(
-    "README.txt",
-    "Template assets. Demo images are downloaded here and referenced with relative paths (assets/...).\n" +
-      `Responsive variants: thumb ${VARIANT_WIDTHS.thumb}px, medium ${VARIANT_WIDTHS.medium}px, large ${VARIANT_WIDTHS.large}px.\n` +
-      "Each step ships as .webp (preferred) plus .jpg (fallback); see manifest.json -> assets.images.\n",
-  );
+
+
 
 
   const { localized, downloaded, failed, variants, webp, manifestAssets, packaged } =
