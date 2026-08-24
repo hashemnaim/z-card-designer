@@ -94,6 +94,9 @@
   function safeUrl(raw) {
     if (!has(raw)) return null;
     var value = String(raw).trim();
+    /* Keep packaged assets relative for direct file:// preview after unzip. */
+    if (/^(?:\.\.?\/)?assets\/[A-Za-z0-9._~!$&'()+,;=@%/-]+(?:\?[^#]*)?(?:#.*)?$/.test(value))
+      return value;
     try {
       var url = new URL(value, "https://placeholder.invalid");
       if (SAFE_SCHEMES.indexOf(url.protocol) === -1) return null;

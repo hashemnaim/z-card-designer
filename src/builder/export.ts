@@ -60,6 +60,24 @@ function extFromType(type: string) {
   return "jpg";
 }
 
+/**
+ * Collapses transform-only URL differences to one source identity. This keeps
+ * the same Unsplash photo from being exported twice when one field requests a
+ * thumbnail and another requests a larger crop.
+ */
+function imageSourceIdentity(value: string) {
+  if (value.startsWith("data:image/")) return value;
+  try {
+    const url = new URL(value, window.location.href);
+    if (url.hostname === "images.unsplash.com") {
+      return `${url.origin}${url.pathname}`;
+    }
+    return url.href;
+  } catch {
+    return value;
+  }
+}
+
 /** Rescales a blob to `width` px (or 0 = keep size) and encodes it to `type`. */
 async function encodeBlob(
   blob: Blob,
@@ -107,6 +125,7 @@ async function hashBytes(bytes: ArrayBuffer): Promise<string> {
 /** Walks demo data, downloads every image (plus WebP/JPG responsive variants) into assets/. */
 async function localizeImages(data: unknown, assetsFolder: JSZip | null) {
   const cache = new Map<string, string>();
+  const bySource = new Map<string, AssetVariantEntry>();
   /** content hash -> already packaged entry (dedupes identical images across fields/URLs) */
   const byContent = new Map<string, AssetVariantEntry>();
   const manifestAssets: AssetVariantEntry[] = [];
@@ -126,6 +145,13 @@ async function localizeImages(data: unknown, assetsFolder: JSZip | null) {
 
   async function fetchOne(url: string): Promise<string | null> {
     if (cache.has(url)) return cache.get(url) ?? null;
+    const sourceIdentity = imageSourceIdentity(url);
+    const sameSource = bySource.get(sourceIdentity);
+    if (sameSource) {
+      cache.set(url, sameSource.fallback);
+      if (!sameSource.sources.includes(url)) sameSource.sources.push(url);
+      return sameSource.fallback;
+    }
     try {
       const res = await fetch(url);
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
@@ -177,6 +203,7 @@ async function localizeImages(data: unknown, assetsFolder: JSZip | null) {
       }
 
       byContent.set(hash, entry);
+      bySource.set(sourceIdentity, entry);
       manifestAssets.push(entry);
       /* demo data points at the fallback so any consumer can load it without WebP support */
       cache.set(url, entry.fallback);
