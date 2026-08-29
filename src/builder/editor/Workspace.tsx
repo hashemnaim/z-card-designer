@@ -13,8 +13,9 @@ import { PreviewFrame } from "./PreviewFrame";
 import { DataPane } from "./DataPane";
 import { ValidationPane } from "./ValidationPane";
 import { FilesPane } from "./FilesPane";
+import { ContentPane } from "./ContentPane";
 
-type Tab = "data" | "validation" | "files";
+type Tab = "content" | "data" | "validation" | "files";
 
 export function Workspace({
   template: initial,
