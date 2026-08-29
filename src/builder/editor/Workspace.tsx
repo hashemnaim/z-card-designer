@@ -13,8 +13,9 @@ import { PreviewFrame } from "./PreviewFrame";
 import { DataPane } from "./DataPane";
 import { ValidationPane } from "./ValidationPane";
 import { FilesPane } from "./FilesPane";
+import { ContentPane } from "./ContentPane";
 
-type Tab = "data" | "validation" | "files";
+type Tab = "content" | "data" | "validation" | "files";
 
 export function Workspace({
   template: initial,
@@ -26,7 +27,7 @@ export function Workspace({
   const { t } = useI18n();
   const [template, setTemplate] = useState(initial);
   const [payload, setPayload] = useState<string | null>(null);
-  const [tab, setTab] = useState<Tab>("data");
+  const [tab, setTab] = useState<Tab>("content");
 
   function patch(next: Partial<TemplateRecord>) {
     const updated = saveTemplate({ ...template, ...next, updatedAt: new Date().toISOString() });
@@ -46,6 +47,7 @@ export function Workspace({
   const report = validateTemplate(template);
 
   const TABS: [Tab, string][] = [
+    ["content", "Content"],
     ["data", t("apiPayload")],
     ["validation", t("validation")],
     ["files", "Package Files"],
@@ -106,6 +108,9 @@ export function Workspace({
               ))}
             </div>
             <div className="min-h-0 flex-1">
+              {tab === "content" && (
+                <ContentPane template={template} onPatch={patch} onPayload={setPayload} />
+              )}
               {tab === "data" && (
                 <DataPane
                   key={template.demoData === initial.demoData ? "demo" : "custom"}
