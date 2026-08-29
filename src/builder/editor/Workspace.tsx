@@ -47,6 +47,7 @@ export function Workspace({
   const report = validateTemplate(template);
 
   const TABS: [Tab, string][] = [
+    ["content", "Content"],
     ["data", t("apiPayload")],
     ["validation", t("validation")],
     ["files", "Package Files"],
