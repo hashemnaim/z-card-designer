@@ -27,7 +27,7 @@ export function Workspace({
   const { t } = useI18n();
   const [template, setTemplate] = useState(initial);
   const [payload, setPayload] = useState<string | null>(null);
-  const [tab, setTab] = useState<Tab>("data");
+  const [tab, setTab] = useState<Tab>("content");
 
   function patch(next: Partial<TemplateRecord>) {
     const updated = saveTemplate({ ...template, ...next, updatedAt: new Date().toISOString() });
