@@ -108,6 +108,9 @@ export function Workspace({
               ))}
             </div>
             <div className="min-h-0 flex-1">
+              {tab === "content" && (
+                <ContentPane template={template} onPatch={patch} onPayload={setPayload} />
+              )}
               {tab === "data" && (
                 <DataPane
                   key={template.demoData === initial.demoData ? "demo" : "custom"}
