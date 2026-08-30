@@ -483,6 +483,9 @@ img { display: block; max-width: 100%; }
 }
 .zc-toast.is-on { opacity: 1; transform: translate(-50%, 0); }
 
+/* theme-driven typography casing (Properties → Uppercase labels) */
+.zc-acc__title, .zc-spec__label, .zc-label { text-transform: var(--zc-label-case, none); }
+
 @media (prefers-reduced-motion: reduce) {
   * { transition-duration: 0.01ms !important; }
 }
