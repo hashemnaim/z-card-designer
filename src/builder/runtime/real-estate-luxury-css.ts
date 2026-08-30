@@ -84,7 +84,7 @@ img { display: block; max-width: 100%; }
   gap: 12px;
   padding: 10px 16px;
   border-radius: 999px;
-  background: rgba(255, 255, 255, 0.72);
+  background: color-mix(in srgb, var(--zc-bg) 72%, transparent);
   backdrop-filter: blur(22px) saturate(180%);
   box-shadow: var(--zc-shadow-soft);
 }
@@ -119,7 +119,7 @@ img { display: block; max-width: 100%; }
 }
 .zc-hero__scrim {
   position: absolute; inset: 0;
-  background: linear-gradient(to bottom, rgba(17,17,17,0.16) 0%, rgba(255,255,255,0) 46%, rgba(255,255,255,0.96) 100%);
+  background: linear-gradient(to bottom, color-mix(in srgb, var(--zc-text) 16%, transparent) 0%, color-mix(in srgb, var(--zc-bg) 0%, transparent) 46%, color-mix(in srgb, var(--zc-bg) 96%, transparent) 100%);
 }
 .zc-hero__body {
   position: relative;
@@ -346,7 +346,7 @@ img { display: block; max-width: 100%; }
   width: 62px; height: 62px;
   border-radius: 999px;
   display: inline-flex; align-items: center; justify-content: center;
-  background: rgba(255, 255, 255, 0.82);
+  background: color-mix(in srgb, var(--zc-bg) 82%, transparent);
   backdrop-filter: blur(12px);
   color: var(--zc-text);
   box-shadow: var(--zc-shadow);
@@ -425,7 +425,7 @@ img { display: block; max-width: 100%; }
   display: flex; justify-content: space-between; gap: 2px;
   padding: 8px 10px;
   border-radius: 999px;
-  background: rgba(255, 255, 255, 0.74);
+  background: color-mix(in srgb, var(--zc-bg) 74%, transparent);
   backdrop-filter: blur(24px) saturate(180%);
   box-shadow: 0 20px 48px -20px rgba(17, 17, 17, 0.34);
   pointer-events: auto;
@@ -449,7 +449,7 @@ img { display: block; max-width: 100%; }
   position: absolute; top: 16px; inset-inline-end: 18px;
   width: 38px; height: 38px;
   border-radius: 999px;
-  background: rgba(255, 255, 255, 0.9);
+  background: color-mix(in srgb, var(--zc-bg) 90%, transparent);
   color: var(--zc-on-accent);
   font-size: 15px;
 }

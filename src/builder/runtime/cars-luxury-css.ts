@@ -60,7 +60,7 @@ export function generateCarsLuxuryCss(template: TemplateRecord): string {
 }
 .zc-hero--cars .zc-hero__coverimg { opacity: calc(0.9 - (var(--p) * 0.5)); }
 .zc-hero--cars .zc-hero__scrim {
-  background: linear-gradient(to bottom, rgba(17,17,17,0.28) 0%, rgba(255,255,255,0) 42%, rgba(255,255,255,0.98) 100%);
+  background: linear-gradient(to bottom, color-mix(in srgb, var(--zc-text) 28%, transparent) 0%, color-mix(in srgb, var(--zc-bg) 0%, transparent) 42%, color-mix(in srgb, var(--zc-bg) 98%, transparent) 100%);
 }
 .zc-hero__car {
   --p: 0;
