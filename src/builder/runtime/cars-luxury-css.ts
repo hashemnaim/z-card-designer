@@ -48,7 +48,7 @@ export function generateCarsLuxuryCss(template: TemplateRecord): string {
   letter-spacing: 0.02em;
   padding: 11px 22px;
   border-radius: 999px;
-  color: #111111;
+  color: var(--zc-on-accent);
   background: var(--zc-gold, #d4af37);
 }
 
@@ -56,11 +56,11 @@ export function generateCarsLuxuryCss(template: TemplateRecord): string {
 
 .zc-hero--cars .zc-hero__cover {
   height: calc(330px - (var(--p) * 150px));
-  background: linear-gradient(170deg, #1b1b1b 0%, #4a4a4a 44%, #ffffff 100%);
+  background: linear-gradient(170deg, color-mix(in srgb, var(--zc-text) 92%, #000) 0%, color-mix(in srgb, var(--zc-text) 62%, var(--zc-bg)) 44%, var(--zc-bg) 100%);
 }
 .zc-hero--cars .zc-hero__coverimg { opacity: calc(0.9 - (var(--p) * 0.5)); }
 .zc-hero--cars .zc-hero__scrim {
-  background: linear-gradient(to bottom, rgba(17,17,17,0.28) 0%, rgba(255,255,255,0) 42%, rgba(255,255,255,0.98) 100%);
+  background: linear-gradient(to bottom, color-mix(in srgb, var(--zc-text) 28%, transparent) 0%, color-mix(in srgb, var(--zc-bg) 0%, transparent) 42%, color-mix(in srgb, var(--zc-bg) 98%, transparent) 100%);
 }
 .zc-hero__car {
   --p: 0;
@@ -107,7 +107,7 @@ export function generateCarsLuxuryCss(template: TemplateRecord): string {
   display: inline-flex; align-items: center; gap: 6px;
   padding: 6px 13px;
   border-radius: 999px;
-  background: #ffffff;
+  background: var(--zc-elev);
   box-shadow: var(--zc-shadow-soft);
   font-size: 12px; font-weight: 600;
 }
@@ -136,7 +136,7 @@ export function generateCarsLuxuryCss(template: TemplateRecord): string {
   border-radius: 999px;
   display: inline-flex; align-items: center; justify-content: center;
   background: var(--zc-gold);
-  color: #ffffff;
+  color: var(--zc-on-accent);
 }
 .zc-agent__check svg { width: 11px; height: 11px; }
 

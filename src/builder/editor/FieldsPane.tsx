@@ -59,6 +59,32 @@ export function FieldsPane({
       </div>
 
       <div className="flex-1 space-y-4 overflow-auto p-3">
+        <section className="rounded-lg border border-border bg-card p-2">
+          <p className="mb-2 font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
+            Sections · show / hide
+          </p>
+          <div className="flex flex-wrap gap-1">
+            {ordered.map((group) => {
+              const hidden = template.hiddenSections.includes(group.id);
+              return (
+                <button
+                  key={group.id}
+                  onClick={() => toggleSection(group.id)}
+                  aria-pressed={!hidden}
+                  className={`flex items-center gap-1 rounded border px-2 py-1 text-[10px] transition-colors ${
+                    hidden
+                      ? "border-border text-muted-foreground line-through hover:bg-accent"
+                      : "border-primary bg-primary/10 text-primary"
+                  }`}
+                >
+                  {hidden ? <EyeOff className="size-3" /> : <Eye className="size-3" />}
+                  {SECTION_LABELS[group.id]?.[lang] ?? humanize(group.id)}
+                </button>
+              );
+            })}
+          </div>
+        </section>
+
         {ordered.map((group) => {
           const hidden = template.hiddenSections.includes(group.id);
           return (

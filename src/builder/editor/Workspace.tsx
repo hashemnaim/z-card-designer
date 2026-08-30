@@ -15,7 +15,7 @@ import { ValidationPane } from "./ValidationPane";
 import { FilesPane } from "./FilesPane";
 import { ContentPane } from "./ContentPane";
 
-type Tab = "content" | "data" | "validation" | "files";
+type Tab = "content" | "design" | "data" | "validation" | "files";
 
 export function Workspace({
   template: initial,
@@ -48,6 +48,7 @@ export function Workspace({
 
   const TABS: [Tab, string][] = [
     ["content", "Content"],
+    ["design", t("properties")],
     ["data", t("apiPayload")],
     ["validation", t("validation")],
     ["files", "Package Files"],
@@ -72,62 +73,55 @@ export function Workspace({
           <Badge variant="secondary" className="font-mono text-[10px]">
             {template.cardType}
           </Badge>
-          <Badge
-            variant={report.ok ? "default" : "destructive"}
-            className="font-mono text-[10px]"
-          >
+          <Badge variant={report.ok ? "default" : "destructive"} className="font-mono text-[10px]">
             {report.ok ? "valid" : "invalid"}
           </Badge>
           <span className="font-mono text-[10px] text-muted-foreground">{t("save")}</span>
         </div>
       </div>
 
-      <div className="grid min-h-0 flex-1 grid-cols-1 lg:grid-cols-[300px_minmax(0,1fr)_300px]">
+      <div className="grid min-h-0 flex-1 grid-cols-1 lg:grid-cols-[300px_minmax(0,1fr)_420px]">
         <aside className="min-h-0 border-b border-border lg:border-b-0 lg:border-r">
           <FieldsPane template={template} onPatch={patch} />
         </aside>
 
-        <main className="flex min-h-0 flex-col">
-          <div className="min-h-[420px] flex-1">
-            <PreviewFrame template={template} data={previewData} />
-          </div>
-          <div className="flex h-[320px] min-h-0 flex-col border-t border-border">
-            <div className="flex items-center gap-1 border-b border-border px-3 py-1.5">
-              {TABS.map(([key, label]) => (
-                <button
-                  key={key}
-                  onClick={() => setTab(key)}
-                  className={`rounded px-2 py-1 text-xs transition-colors ${
-                    tab === key
-                      ? "bg-accent text-foreground"
-                      : "text-muted-foreground hover:bg-accent/60"
-                  }`}
-                >
-                  {label}
-                </button>
-              ))}
-            </div>
-            <div className="min-h-0 flex-1">
-              {tab === "content" && (
-                <ContentPane template={template} onPatch={patch} onPayload={setPayload} />
-              )}
-              {tab === "data" && (
-                <DataPane
-                  key={template.demoData === initial.demoData ? "demo" : "custom"}
-                  template={template}
-                  onPatch={patch}
-                  payload={payload}
-                  onPayload={setPayload}
-                />
-              )}
-              {tab === "validation" && <ValidationPane template={template} />}
-              {tab === "files" && <FilesPane template={template} />}
-            </div>
-          </div>
+        <main className="flex min-h-0 min-h-[520px] flex-col">
+          <PreviewFrame template={template} data={previewData} />
         </main>
 
-        <aside className="min-h-0 border-t border-border lg:border-l lg:border-t-0">
-          <PropertiesPane template={template} onPatch={patch} />
+        <aside className="flex min-h-0 flex-col border-t border-border lg:border-l lg:border-t-0">
+          <div className="flex flex-wrap items-center gap-1 border-b border-border px-3 py-1.5">
+            {TABS.map(([key, label]) => (
+              <button
+                key={key}
+                onClick={() => setTab(key)}
+                className={`rounded px-2 py-1 text-xs transition-colors ${
+                  tab === key
+                    ? "bg-accent text-foreground"
+                    : "text-muted-foreground hover:bg-accent/60"
+                }`}
+              >
+                {label}
+              </button>
+            ))}
+          </div>
+          <div className="min-h-0 flex-1 overflow-hidden">
+            {tab === "content" && (
+              <ContentPane template={template} onPatch={patch} onPayload={setPayload} />
+            )}
+            {tab === "design" && <PropertiesPane template={template} onPatch={patch} />}
+            {tab === "data" && (
+              <DataPane
+                key={template.demoData === initial.demoData ? "demo" : "custom"}
+                template={template}
+                onPatch={patch}
+                payload={payload}
+                onPayload={setPayload}
+              />
+            )}
+            {tab === "validation" && <ValidationPane template={template} />}
+            {tab === "files" && <FilesPane template={template} />}
+          </div>
         </aside>
       </div>
     </div>
