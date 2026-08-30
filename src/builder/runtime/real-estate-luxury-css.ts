@@ -133,7 +133,7 @@ img { display: block; max-width: 100%; }
   width: 96px; height: 96px;
   border-radius: 30px;
   padding: 5px;
-  background: #ffffff;
+  background: var(--zc-elev);
   box-shadow: var(--zc-shadow);
   transform: scale(calc(1 - (var(--p) * 0.18))) translateY(calc(var(--p) * -8px));
   opacity: calc(1 - (var(--p) * 0.15));
@@ -158,7 +158,7 @@ img { display: block; max-width: 100%; }
   padding: 5px 14px;
   border-radius: 999px;
   background: var(--zc-gold-soft);
-  color: color-mix(in srgb, var(--zc-gold) 78%, #111111);
+  color: color-mix(in srgb, var(--zc-gold) 78%, var(--zc-text));
   font-size: 11px;
   font-weight: 600;
   letter-spacing: 0.1em;
@@ -184,7 +184,7 @@ img { display: block; max-width: 100%; }
   font-family: var(--zc-heading);
   font-size: 21px;
   font-weight: 600;
-  color: color-mix(in srgb, var(--zc-gold) 82%, #111111);
+  color: color-mix(in srgb, var(--zc-gold) 82%, var(--zc-text));
   letter-spacing: 0.01em;
 }
 .zc-hero__desc {
@@ -207,7 +207,7 @@ img { display: block; max-width: 100%; }
 }
 .zc-btn:active { transform: scale(0.975); }
 .zc-btn--gold {
-  background: linear-gradient(135deg, color-mix(in srgb, var(--zc-gold) 88%, #ffffff), var(--zc-gold));
+  background: linear-gradient(135deg, color-mix(in srgb, var(--zc-gold) 88%, var(--zc-bg)), var(--zc-gold));
   color: #ffffff;
   box-shadow: 0 14px 30px -14px rgba(212, 175, 55, 0.75);
 }
@@ -221,7 +221,7 @@ img { display: block; max-width: 100%; }
   overflow: hidden;
   transition: background 0.3s var(--zc-ease), box-shadow 0.3s var(--zc-ease);
 }
-.zc-acc.is-open { background: #ffffff; box-shadow: var(--zc-shadow-soft); }
+.zc-acc.is-open { background: var(--zc-elev); box-shadow: var(--zc-shadow-soft); }
 .zc-acc__head {
   width: 100%;
   display: flex; align-items: center; gap: 13px;
@@ -232,7 +232,7 @@ img { display: block; max-width: 100%; }
   width: 38px; height: 38px; flex: none;
   border-radius: 14px;
   display: inline-flex; align-items: center; justify-content: center;
-  background: #ffffff;
+  background: var(--zc-elev);
   color: var(--zc-gold);
   box-shadow: var(--zc-shadow-soft);
 }
@@ -276,7 +276,7 @@ img { display: block; max-width: 100%; }
   padding: 8px 15px;
   border-radius: 999px;
   background: var(--zc-gold-soft);
-  color: color-mix(in srgb, var(--zc-gold) 76%, #111111);
+  color: color-mix(in srgb, var(--zc-gold) 76%, var(--zc-text));
   font-size: 12px; font-weight: 600;
 }
 .zc-ready__ico { width: 15px; height: 15px; }
@@ -370,7 +370,7 @@ img { display: block; max-width: 100%; }
   width: 42px; height: 42px;
   border-radius: 999px;
   display: inline-flex; align-items: center; justify-content: center;
-  background: #ffffff;
+  background: var(--zc-elev);
   color: var(--zc-gold);
   box-shadow: var(--zc-shadow);
 }
@@ -402,7 +402,7 @@ img { display: block; max-width: 100%; }
   border-radius: 999px;
   display: inline-flex; align-items: center; justify-content: center;
   background: var(--zc-gold-soft);
-  color: color-mix(in srgb, var(--zc-gold) 80%, #111111);
+  color: color-mix(in srgb, var(--zc-gold) 80%, var(--zc-text));
 }
 .zc-act__ico svg { width: 18px; height: 18px; }
 .zc-act__txt { font-size: 11px; color: var(--zc-muted); }
@@ -427,7 +427,7 @@ img { display: block; max-width: 100%; }
   pointer-events: auto;
 }
 .zc-bar .zc-act { flex: 1; padding: 2px 0; }
-.zc-bar .zc-act__ico { width: 36px; height: 36px; background: #ffffff; }
+.zc-bar .zc-act__ico { width: 36px; height: 36px; background: var(--zc-elev); }
 .zc-bar .zc-act__txt { font-size: 10px; }
 
 /* ---------- overlays ---------- */
@@ -446,7 +446,7 @@ img { display: block; max-width: 100%; }
   width: 38px; height: 38px;
   border-radius: 999px;
   background: rgba(255, 255, 255, 0.9);
-  color: #111111;
+  color: var(--zc-on-accent);
   font-size: 15px;
 }
 .zc-overlay__body { width: 100%; }
@@ -465,7 +465,7 @@ img { display: block; max-width: 100%; }
 }
 .zc-lightbox__img { width: 100%; max-height: 70vh; object-fit: cover; }
 .zc-qr { display: flex; flex-direction: column; align-items: center; gap: 14px; }
-.zc-qr__frame { padding: 16px; border-radius: var(--zc-radius); background: #ffffff; box-shadow: var(--zc-shadow); }
+.zc-qr__frame { padding: 16px; border-radius: var(--zc-radius); background: var(--zc-elev); box-shadow: var(--zc-shadow); }
 .zc-qr__img { width: 208px; height: 208px; }
 .zc-qr__caption { margin: 0; color: rgba(255,255,255,0.86); font-size: 14px; text-align: center; }
 

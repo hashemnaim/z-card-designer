@@ -48,7 +48,7 @@ export function generateCarsLuxuryCss(template: TemplateRecord): string {
   letter-spacing: 0.02em;
   padding: 11px 22px;
   border-radius: 999px;
-  color: #111111;
+  color: var(--zc-on-accent);
   background: var(--zc-gold, #d4af37);
 }
 
@@ -107,7 +107,7 @@ export function generateCarsLuxuryCss(template: TemplateRecord): string {
   display: inline-flex; align-items: center; gap: 6px;
   padding: 6px 13px;
   border-radius: 999px;
-  background: #ffffff;
+  background: var(--zc-elev);
   box-shadow: var(--zc-shadow-soft);
   font-size: 12px; font-weight: 600;
 }
