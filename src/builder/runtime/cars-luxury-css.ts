@@ -56,7 +56,7 @@ export function generateCarsLuxuryCss(template: TemplateRecord): string {
 
 .zc-hero--cars .zc-hero__cover {
   height: calc(330px - (var(--p) * 150px));
-  background: linear-gradient(170deg, #1b1b1b 0%, #4a4a4a 44%, #ffffff 100%);
+  background: linear-gradient(170deg, color-mix(in srgb, var(--zc-text) 92%, #000) 0%, color-mix(in srgb, var(--zc-text) 62%, var(--zc-bg)) 44%, var(--zc-bg) 100%);
 }
 .zc-hero--cars .zc-hero__coverimg { opacity: calc(0.9 - (var(--p) * 0.5)); }
 .zc-hero--cars .zc-hero__scrim {
@@ -136,7 +136,7 @@ export function generateCarsLuxuryCss(template: TemplateRecord): string {
   border-radius: 999px;
   display: inline-flex; align-items: center; justify-content: center;
   background: var(--zc-gold);
-  color: #ffffff;
+  color: var(--zc-on-accent);
 }
 .zc-agent__check svg { width: 11px; height: 11px; }
 

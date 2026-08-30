@@ -17,6 +17,8 @@ export function generateRealEstateLuxuryCss(template: TemplateRecord): string {
   const radiusSm = Math.max(0, Math.round(radius * 0.64));
   const gap = t.density === "compact" ? 10 : t.density === "roomy" ? 22 : 16;
   const labelCase = t.uppercaseLabels ? "uppercase" : "none";
+  const elev = t.background || "#ffffff";
+  const onAccent = t.accentText || "#111111";
 
   return `/* ${template.id} — Z Card Real Estate Luxury card (standalone, mobile 9:19) */
 :root {
@@ -34,6 +36,8 @@ export function generateRealEstateLuxuryCss(template: TemplateRecord): string {
   --zc-shadow-soft: 0 10px 30px -18px color-mix(in srgb, ${text} 20%, transparent);
   --zc-heading: ${heading};
   --zc-body: ${body};
+  --zc-elev: ${elev};
+  --zc-on-accent: ${onAccent};
   --zc-ease: cubic-bezier(0.22, 0.61, 0.36, 1);
 }
 
@@ -148,7 +152,7 @@ img { display: block; max-width: 100%; }
   border-radius: 999px;
   display: inline-flex; align-items: center; justify-content: center;
   background: var(--zc-gold);
-  color: #ffffff;
+  color: var(--zc-on-accent);
   box-shadow: 0 6px 16px -6px rgba(212, 175, 55, 0.9);
 }
 .zc-verified svg { width: 15px; height: 15px; }
@@ -208,8 +212,8 @@ img { display: block; max-width: 100%; }
 .zc-btn:active { transform: scale(0.975); }
 .zc-btn--gold {
   background: linear-gradient(135deg, color-mix(in srgb, var(--zc-gold) 88%, var(--zc-bg)), var(--zc-gold));
-  color: #ffffff;
-  box-shadow: 0 14px 30px -14px rgba(212, 175, 55, 0.75);
+  color: var(--zc-on-accent);
+  box-shadow: 0 14px 30px -14px color-mix(in srgb, var(--zc-gold) 70%, transparent);
 }
 .zc-btn--ghost { background: var(--zc-card); color: var(--zc-text); }
 
