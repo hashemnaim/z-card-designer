@@ -9,23 +9,34 @@ export function generateRealEstateLuxuryCss(template: TemplateRecord): string {
   const gold = t.accent || "#D4AF37";
   const heading = t.headingFont || "'Playfair Display', Georgia, serif";
   const body = t.bodyFont || "'Inter', system-ui, sans-serif";
+  const bg = t.background || "#ffffff";
+  const card = t.surface || "#f8f8f8";
+  const text = t.text || "#111111";
+  const muted = t.muted || "#777777";
+  const radius = Math.max(0, Math.min(40, Number(t.radius ?? 28)));
+  const radiusSm = Math.max(0, Math.round(radius * 0.64));
+  const gap = t.density === "compact" ? 10 : t.density === "roomy" ? 22 : 16;
+  const labelCase = t.uppercaseLabels ? "uppercase" : "none";
 
   return `/* ${template.id} — Z Card Real Estate Luxury card (standalone, mobile 9:19) */
 :root {
-  --zc-bg: #ffffff;
-  --zc-card: #f8f8f8;
+  --zc-bg: ${bg};
+  --zc-card: ${card};
   --zc-gold: ${gold};
-  --zc-gold-soft: color-mix(in srgb, ${gold} 12%, #ffffff);
-  --zc-text: #111111;
-  --zc-muted: #777777;
-  --zc-radius: 28px;
-  --zc-radius-sm: 18px;
-  --zc-shadow: 0 18px 46px -22px rgba(17, 17, 17, 0.22);
-  --zc-shadow-soft: 0 10px 30px -18px rgba(17, 17, 17, 0.18);
+  --zc-gold-soft: color-mix(in srgb, ${gold} 12%, ${bg});
+  --zc-text: ${text};
+  --zc-muted: ${muted};
+  --zc-radius: ${radius}px;
+  --zc-radius-sm: ${radiusSm}px;
+  --zc-gap: ${gap}px;
+  --zc-label-case: ${labelCase};
+  --zc-shadow: 0 18px 46px -22px color-mix(in srgb, ${text} 24%, transparent);
+  --zc-shadow-soft: 0 10px 30px -18px color-mix(in srgb, ${text} 20%, transparent);
   --zc-heading: ${heading};
   --zc-body: ${body};
   --zc-ease: cubic-bezier(0.22, 0.61, 0.36, 1);
 }
+
 
 * { box-sizing: border-box; }
 html, body { margin: 0; padding: 0; background: var(--zc-bg); }
