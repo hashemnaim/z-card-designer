@@ -6,7 +6,7 @@ export const getRouter = () => {
   const queryClient = new QueryClient();
   const basepath =
     typeof window !== "undefined"
-      ? (import.meta.env.VITE_APP_BASEPATH ?? "/")
+      ? (import.meta.env['VITE_APP_BASEPATH'] ?? "/")
       : "/";
 
   const router = createRouter({
