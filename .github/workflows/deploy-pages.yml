@@ -32,6 +32,7 @@ jobs:
       - name: Build GitHub Pages SPA
         env:
           VITE_APP_BASEPATH: "/z-card-designer"
+          VITE_GITHUB_PAGES: "true"
         run: bunx vite build --config vite.pages.config.ts
 
       - name: Finalize Pages files
