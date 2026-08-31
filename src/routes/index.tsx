@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { Copy, Download, FileJson, Loader2, Plus, Trash2 } from "lucide-react";
+import { Copy, Download, FileJson, Loader2, PenSquare, Plus, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { AppHeader } from "@/components/AppHeader";
 import { Badge } from "@/components/ui/badge";
@@ -240,6 +240,23 @@ function TemplateCard({
           >
             {t("open")}
           </Button>
+          <Button
+            size="sm"
+            variant="outline"
+            className="h-7 gap-1"
+            onClick={() =>
+              window.open(
+                `/editor/${template.id}`,
+                `zcard-editor-${template.id}`,
+                "popup=yes,width=1280,height=900",
+              )
+            }
+          >
+            <PenSquare className="size-3" />
+            Editor window
+          </Button>
+
+
           <Button
             size="sm"
             variant="outline"

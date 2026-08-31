@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import { Link } from "@tanstack/react-router";
-import { ChevronLeft } from "lucide-react";
+import { ChevronLeft, PenSquare } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { saveTemplate } from "@/builder/store";
@@ -70,6 +70,21 @@ export function Workspace({
           </p>
         </div>
         <div className="ml-auto flex items-center gap-2">
+          <Button
+            size="sm"
+            variant="outline"
+            className="h-7 gap-1.5"
+            onClick={() =>
+              window.open(
+                `/editor/${template.id}`,
+                `zcard-editor-${template.id}`,
+                "popup=yes,width=1280,height=900",
+              )
+            }
+          >
+            <PenSquare className="size-3" />
+            Editor window
+          </Button>
           <Badge variant="secondary" className="font-mono text-[10px]">
             {template.cardType}
           </Badge>
@@ -78,6 +93,7 @@ export function Workspace({
           </Badge>
           <span className="font-mono text-[10px] text-muted-foreground">{t("save")}</span>
         </div>
+
       </div>
 
       <div className="grid min-h-0 flex-1 grid-cols-1 lg:grid-cols-[300px_minmax(0,1fr)_420px]">

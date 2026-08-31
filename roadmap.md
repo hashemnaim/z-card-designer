@@ -1,0 +1,1 @@
+- Fix typecheck errors in router.tsx / vite.config.ts (done)
