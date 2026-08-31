@@ -13,17 +13,6 @@ export default defineConfig({
     // Redirect TanStack Start's bundled server entry to src/server.ts (our SSR error wrapper).
     // nitro/vite builds from this
     server: { entry: "server" },
-    // GitHub Pages is a static host, so generate a client-side application shell there.
-    ...(isGitHubPages
-      ? {
-          spa: {
-            enabled: true,
-            prerender: {
-              outputPath: "/index.html",
-            },
-          },
-        }
-      : {}),
   },
   vite: {
     // Project Pages sites are hosted under /<repository>/ rather than the domain root.
