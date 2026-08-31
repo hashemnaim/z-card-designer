@@ -14,6 +14,8 @@ import { reportLovableError } from "../lib/lovable-error-reporting";
 import { I18nProvider } from "@/lib/i18n";
 import { Toaster } from "@/components/ui/sonner";
 
+const isGitHubPagesPreview = import.meta.env.VITE_GITHUB_PAGES === "true";
+
 function NotFoundComponent() {
   return (
     <div className="flex min-h-screen items-center justify-center bg-background px-4">
@@ -62,12 +64,12 @@ function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
           >
             Try again
           </button>
-          <a
-            href="/"
+          <Link
+            to="/"
             className="inline-flex items-center justify-center rounded-md border border-input bg-background px-4 py-2 text-sm font-medium text-foreground transition-colors hover:bg-accent"
           >
             Go home
-          </a>
+          </Link>
         </div>
       </div>
     </div>
@@ -97,10 +99,10 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
         rel: "stylesheet",
         href: "https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&family=Playfair+Display:wght@500;700&family=Cormorant+Garamond:wght@500;600&family=Libre+Baskerville:wght@400;700&display=swap",
       },
-      { rel: "icon", href: "/favicon.ico", type: "image/x-icon" },
+      { rel: "icon", href: isGitHubPagesPreview ? "/z-card-designer/favicon.ico" : "/favicon.ico", type: "image/x-icon" },
     ],
   }),
-  shellComponent: RootShell,
+  shellComponent: isGitHubPagesPreview ? undefined : RootShell,
   component: RootComponent,
   notFoundComponent: NotFoundComponent,
   errorComponent: ErrorComponent,
@@ -126,7 +128,6 @@ function RootComponent() {
   return (
     <QueryClientProvider client={queryClient}>
       <I18nProvider>
-        {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
         <Outlet />
         <Toaster position="top-right" />
       </I18nProvider>
