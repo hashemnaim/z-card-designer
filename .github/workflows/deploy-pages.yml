@@ -29,14 +29,37 @@ jobs:
       - name: Install dependencies
         run: bun install --frozen-lockfile
 
-      - name: Build static preview
+      - name: Build application
         env:
           GITHUB_PAGES: "true"
           VITE_APP_BASEPATH: "/z-card-designer"
         run: bun run build
 
-      - name: Add Pages marker
-        run: touch .output/public/.nojekyll
+      - name: Generate static Pages shell
+        run: |
+          ENTRY=$(basename "$(ls .output/public/assets/index-*.js | head -n 1)")
+          CSS=$(basename "$(ls .output/public/assets/styles-*.css | head -n 1)")
+          cat > .output/public/index.html <<EOF
+          <!doctype html>
+          <html lang="en">
+            <head>
+              <meta charset="UTF-8" />
+              <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+              <title>Z Card Template Builder</title>
+              <meta name="description" content="Internal tool to author, preview, validate and export Z Card templates." />
+              <meta name="robots" content="noindex" />
+              <link rel="stylesheet" href="/z-card-designer/assets/$CSS" />
+              <link rel="preconnect" href="https://fonts.googleapis.com" />
+              <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+              <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&family=Playfair+Display:wght@500;700&family=Cormorant+Garamond:wght@500;600&family=Libre+Baskerville:wght@400;700&display=swap" />
+            </head>
+            <body>
+              <script type="module" src="/z-card-designer/assets/$ENTRY"></script>
+            </body>
+          </html>
+          EOF
+          cp .output/public/index.html .output/public/404.html
+          touch .output/public/.nojekyll
 
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v4
