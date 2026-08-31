@@ -254,6 +254,8 @@ function TemplateCard({
           >
             <PenSquare className="size-3" />
             Editor window
+          </Button>
+
 
           <Button
             size="sm"
