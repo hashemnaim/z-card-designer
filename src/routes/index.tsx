@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { Copy, Download, FileJson, Loader2, Plus, Trash2 } from "lucide-react";
+import { Copy, Download, FileJson, Loader2, PenSquare, Plus, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { AppHeader } from "@/components/AppHeader";
 import { Badge } from "@/components/ui/badge";
