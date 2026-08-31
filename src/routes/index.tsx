@@ -244,6 +244,21 @@ function TemplateCard({
             size="sm"
             variant="outline"
             className="h-7 gap-1"
+            onClick={() =>
+              window.open(
+                `/editor/${template.id}`,
+                `zcard-editor-${template.id}`,
+                "popup=yes,width=1280,height=900",
+              )
+            }
+          >
+            <PenSquare className="size-3" />
+            Editor window
+
+          <Button
+            size="sm"
+            variant="outline"
+            className="h-7 gap-1"
             onClick={download}
             disabled={busy}
           >
