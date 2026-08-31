@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as NewRouteImport } from './routes/new'
+import { Route as EditorTemplateIdRouteImport } from './routes/editor.$templateId'
 import { Route as TTemplateIdRouteImport } from './routes/t.$templateId'
 
 const IndexRoute = IndexRouteImport.update({
@@ -23,6 +24,11 @@ const NewRoute = NewRouteImport.update({
   path: '/new',
   getParentRoute: () => rootRouteImport,
 } as any)
+const EditorTemplateIdRoute = EditorTemplateIdRouteImport.update({
+  id: '/editor/$templateId',
+  path: '/editor/$templateId',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const TTemplateIdRoute = TTemplateIdRouteImport.update({
   id: '/t/$templateId',
   path: '/t/$templateId',
@@ -32,30 +38,34 @@ const TTemplateIdRoute = TTemplateIdRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/new': typeof NewRoute
+  '/editor/$templateId': typeof EditorTemplateIdRoute
   '/t/$templateId': typeof TTemplateIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/new': typeof NewRoute
+  '/editor/$templateId': typeof EditorTemplateIdRoute
   '/t/$templateId': typeof TTemplateIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/new': typeof NewRoute
+  '/editor/$templateId': typeof EditorTemplateIdRoute
   '/t/$templateId': typeof TTemplateIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/new' | '/t/$templateId'
+  fullPaths: '/' | '/new' | '/editor/$templateId' | '/t/$templateId'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/new' | '/t/$templateId'
-  id: '__root__' | '/' | '/new' | '/t/$templateId'
+  to: '/' | '/new' | '/editor/$templateId' | '/t/$templateId'
+  id: '__root__' | '/' | '/new' | '/editor/$templateId' | '/t/$templateId'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   NewRoute: typeof NewRoute
+  EditorTemplateIdRoute: typeof EditorTemplateIdRoute
   TTemplateIdRoute: typeof TTemplateIdRoute
 }
 
@@ -75,6 +85,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof NewRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/editor/$templateId': {
+      id: '/editor/$templateId'
+      path: '/editor/$templateId'
+      fullPath: '/editor/$templateId'
+      preLoaderRoute: typeof EditorTemplateIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/t/$templateId': {
       id: '/t/$templateId'
       path: '/t/$templateId'
@@ -88,6 +105,7 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   NewRoute: NewRoute,
+  EditorTemplateIdRoute: EditorTemplateIdRoute,
   TTemplateIdRoute: TTemplateIdRoute,
 }
 export const routeTree = rootRouteImport
