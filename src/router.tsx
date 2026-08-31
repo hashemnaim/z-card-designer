@@ -4,9 +4,14 @@ import { routeTree } from "./routeTree.gen";
 
 export const getRouter = () => {
   const queryClient = new QueryClient();
+  const basepath =
+    typeof window !== "undefined"
+      ? (import.meta.env.VITE_APP_BASEPATH ?? "/")
+      : "/";
 
   const router = createRouter({
     routeTree,
+    basepath,
     context: { queryClient },
     scrollRestoration: true,
     defaultPreloadStaleTime: 0,
